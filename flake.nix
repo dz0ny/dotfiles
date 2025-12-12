@@ -31,6 +31,7 @@
         cachix
         atuin
         bat
+        nodejs_24
       ];
 
       programs.vim.enable = true;
