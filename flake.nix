@@ -161,6 +161,7 @@
         };
         initContent = ''
           eval "$(atuin init zsh --disable-up-arrow)"
+          [[ -f ~/Work/dotfiles/.secrets.env ]] && source ~/Work/dotfiles/.secrets.env
 
           function edithosts {
               export EDITOR="code --wait"
