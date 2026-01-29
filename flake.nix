@@ -13,7 +13,6 @@
 
   outputs = inputs@{ self, nixpkgs, nixpkgs-unstable, nix-darwin, home-manager }:
   let
-    secrets = import /Users/dejanmurko/.dotfiles/secrets.nix;
 
     homeconfig = { pkgs, lib, ... }: {
       # Home Manager configuration
@@ -46,7 +45,7 @@
         settings = {
           user = {
             name = "Dejan Murko";
-            email = secrets.email;
+            email = "dmurko@users.noreply.github.com";
           };
           alias = {
             ap = "add -p";
@@ -142,7 +141,7 @@
         };
         shellAliases = {
           cat = "bat";
-          nixre = "sudo darwin-rebuild switch --flake ~/.dotfiles#Dejans-Air --impure";
+          nixre = "sudo darwin-rebuild switch --flake ~/.dotfiles#Dejans-Air";
           nixcfg = "code ~/.dotfiles";
           nixgc = "nix-collect-garbage -d";
           nixdu = "du -shx /nix/store ";
