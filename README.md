@@ -32,7 +32,7 @@ nixgc
 
 Go to
 ```
-cd ~/.dotfiles
+cd ~/Work/dotfiles
 ```
 
 Run
@@ -50,7 +50,7 @@ nixre
 Open dotfiles in Code/Cursor
 
 ```
-cursor ~/.dotfiles
+cursor ~/Work/dotfiles
 ```
 
 Commit changes via Code to GitHub.

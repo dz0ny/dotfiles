@@ -9,12 +9,21 @@
     home-manager.url = "github:nix-community/home-manager/release-25.11";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
+    # Shared Claude Code configuration for Niteo
+    niteo-claude.url = "git+ssh://git@github.com/teamniteo/claude";
+
   };
 
-  outputs = inputs@{ self, nixpkgs, nixpkgs-unstable, nix-darwin, home-manager }:
+  outputs = inputs@{ self, nixpkgs, nixpkgs-unstable, nix-darwin, home-manager, niteo-claude }:
   let
 
-    homeconfig = { pkgs, lib, ... }: {
+    homeconfig = { pkgs, lib, ... }:
+    let
+      pkgs-unstable = import nixpkgs-unstable {
+        system = "aarch64-darwin";
+        config.allowUnfree = true;
+      };
+    in {
       # Home Manager configuration
       # https://nix-community.github.io/home-manager/
       home.homeDirectory = lib.mkForce "/Users/dejanmurko";
@@ -25,8 +34,7 @@
 
       # Software I can't live without
       home.packages = with pkgs; [
-        (import nixpkgs-unstable { system = "aarch64-darwin"; }).devenv
-        (import nixpkgs-unstable { system = "aarch64-darwin"; config.allowUnfree = true; }).claude-code
+        pkgs-unstable.devenv
         cachix
         atuin
         bat
@@ -141,8 +149,8 @@
         };
         shellAliases = {
           cat = "bat";
-          nixre = "sudo darwin-rebuild switch --flake ~/.dotfiles#Dejans-Air";
-          nixcfg = "code ~/.dotfiles";
+          nixre = "sudo darwin-rebuild switch --flake ~/Work/dotfiles#Dejans-Air";
+          nixcfg = "code ~/Work/dotfiles";
           nixgc = "nix-collect-garbage -d";
           nixdu = "du -shx /nix/store ";
           history = "atuin search -i";
@@ -160,6 +168,50 @@
               echo "* Successfully edited /etc/hosts"
               sudo dscacheutil -flushcache && echo "* Flushed local DNS cache"
           }   
+        '';
+      };
+
+    programs.claude-code = {
+        enable = true;
+        package = pkgs-unstable.claude-code;
+
+        # Get team MCPs from teamniteo/claude
+        mcpServers = niteo-claude.lib.mcpServers pkgs // {};
+
+        settings = {
+
+          # Get team Plugins from teamniteo/claude
+          enabledPlugins = niteo-claude.lib.enabledPlugins // {};
+
+          # Get team Permissions from teamniteo/claude
+          permissions.allow = niteo-claude.lib.permissions.allow ++ [
+
+            # Auto-allow read-only commands in common directories
+            "Read(~/Work/*)"
+            "Bash(cat ~/Work/*)"
+            "Bash(head ~/Work/*)"
+            "Bash(ls ~/Work/*)"
+            "Bash(tail ~/Work/*)"
+          ];
+        };
+
+        # Personal CLAUDE.md content
+        memory.text = ''
+          # About the User
+
+          Dejan Murko (dmurko) - Founder and CEO of Niteo.co, a bootstrapped multi-product company founded in 2007, based in EU. Also founder of
+            * ParetoSecurity.com: macOS/linux security app and monitoring service
+            * MayetRX: clinical trials vendor and project management software
+
+          TODO
+          - Passionate about code quality, testing, and continuous delivery.
+          - Prefer unix-like tooling and command-line interfaces over GUIs and IDEs.
+          - Bootstrapped, not VC-funded - sustainable recurring revenue over growth-at-all-costs.
+          - Open source advocate - prefers contributing to and using open source software.
+          - Effectiveness over productivity - focus on impact, not hours
+
+          **GitHub:** github.com/dmurko - use the GitHub MCP to access private repos when needed.
+          **Workstation:** github.com/dmurko/dotfiles - usually invokes Claude from his nix-darwin-powered MacBook defined in these dotfiles.
         '';
       };
 
@@ -279,6 +331,9 @@
             home-manager.useUserPackages = true;
             home-manager.users.dejanmurko = homeconfig;
             home-manager.backupFileExtension = ".backup";
+            home-manager.extraSpecialArgs = {
+              inherit niteo-claude;
+            };
         }
       ];
     };
