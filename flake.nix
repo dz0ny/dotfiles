@@ -2,11 +2,11 @@
   description = "dmurko's nix-darwin system flake";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-25.05-darwin";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-25.11-darwin";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    nix-darwin.url = "github:LnL7/nix-darwin/nix-darwin-25.05";
+    nix-darwin.url = "github:LnL7/nix-darwin/nix-darwin-25.11";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
-    home-manager.url = "github:nix-community/home-manager/release-25.05";
+    home-manager.url = "github:nix-community/home-manager/release-25.11";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
   };
@@ -19,7 +19,7 @@
       # Home Manager configuration
       # https://nix-community.github.io/home-manager/
       home.homeDirectory = lib.mkForce "/Users/dejanmurko";
-      home.stateVersion = "25.05";
+      home.stateVersion = "25.11";
       programs.home-manager.enable = true;
       programs.htop.enable = true;
       programs.bat.enable = true;
@@ -43,20 +43,21 @@
 
       programs.git = {
         enable = true;
-        diff-so-fancy.enable = true;
-        userName = "Dejan Murko";
-        userEmail = secrets.email;
-        aliases = {
-          ap = "add -p";
-          st = "status";
-          ci = "commit";
-          co = "checkout";
-          df = "diff";
-          l = "log";
-          ll = "log -p";
-          rehab = "reset origin/main --hard";
-        };
-        extraConfig = {
+        settings = {
+          user = {
+            name = "Dejan Murko";
+            email = secrets.email;
+          };
+          alias = {
+            ap = "add -p";
+            st = "status";
+            ci = "commit";
+            co = "checkout";
+            df = "diff";
+            l = "log";
+            ll = "log -p";
+            rehab = "reset origin/main --hard";
+          };
           branch = {
             autosetuprebase = "always";
           };
@@ -102,13 +103,18 @@
         ];
       };
 
+      programs.diff-so-fancy = {
+        enable = true;
+        enableGitIntegration = true;
+      };
+
       programs.ssh = {
         enable = true;
+        enableDefaultConfig = false;
 
-        extraConfig = ''
-          Host *
-            IdentityAgent /Users/dejanmurko/Library/Containers/com.maxgoedjen.Secretive.SecretAgent/Data/socket.ssh
-        '';
+        matchBlocks."*" = {
+          identityAgent = "/Users/dejanmurko/Library/Containers/com.maxgoedjen.Secretive.SecretAgent/Data/socket.ssh";
+        };
       };
 
 
@@ -182,8 +188,8 @@
       security.pam.services.sudo_local.touchIdAuth = true;
 
       # make sure firewall is up & running
-      system.defaults.alf.globalstate = 1;
-      system.defaults.alf.stealthenabled = 1;
+      networking.applicationFirewall.enable = true;
+      networking.applicationFirewall.enableStealthMode = true;
 
         # Personalization
         system.primaryUser = "dejanmurko";
