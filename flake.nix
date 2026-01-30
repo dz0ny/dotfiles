@@ -200,16 +200,13 @@
         memory.text = ''
           # About the User
 
-          Dejan Murko (dmurko) - Founder and CEO of Niteo.co, a bootstrapped multi-product company founded in 2007, based in EU. Also founder of
-            * ParetoSecurity.com: macOS/linux security app and monitoring service
-            * MayetRX: clinical trials vendor and project management software
+          Dejan Murko (dmurko) - Co-Founder and Product Lead of Niteo, a bootstrapped SaaS studio founded in 2007, based in Europe. Co-Founder and Product Lead of Mayet, a bootstrapped company building software solutions for the biotech and pharma industry.
 
-          TODO
-          - Passionate about code quality, testing, and continuous delivery.
-          - Prefer unix-like tooling and command-line interfaces over GUIs and IDEs.
+          - Believes great software should be self-explanatory. Prioritizes intuitive UI and accessibility over design sophistication.
+          - Values consistency as a design principle. Reusable patterns, predictable behavior, no surprises.
           - Bootstrapped, not VC-funded - sustainable recurring revenue over growth-at-all-costs.
           - Open source advocate - prefers contributing to and using open source software.
-          - Effectiveness over productivity - focus on impact, not hours
+          - Effectiveness over productivity - focus on impact, not hours.
 
           **GitHub:** github.com/dmurko - use the GitHub MCP to access private repos when needed.
           **Workstation:** github.com/dmurko/dotfiles - usually invokes Claude from his nix-darwin-powered MacBook defined in these dotfiles.
