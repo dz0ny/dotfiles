@@ -102,7 +102,9 @@
           ./modules/darwin/sops-secrets.nix
           ./modules/darwin/users.nix
           ./nix-overlays.nix
-        ];
+        
+          ./modules/darwin/system-defaults.nix
+];
       };
     };
 }

@@ -1,5 +1,30 @@
 {
-  "taps": [],
   "brews": [],
-  "casks": []
+  "casks": [
+    "android-commandlinetools",
+    "android-platform-tools",
+    "androidtool",
+    "openscad",
+    "orbstack",
+    "quarto",
+    "sikarugir"
+  ],
+  "taps": [
+    "antoniorodr/memo",
+    "charmbracelet/tap",
+    "daytonaio/cli",
+    "deskflow/tap",
+    "dotenvx/brew",
+    "heroku/brew",
+    "homebrew/bundle",
+    "lihaoyun6/tap",
+    "netbirdio/tap",
+    "nikitabobko/tap",
+    "noborus/tap",
+    "rsteube/tap",
+    "sikarugir-app/sikarugir",
+    "steipete/tap",
+    "stripe/stripe-cli",
+    "tinygo-org/tools"
+  ]
 }
