@@ -165,6 +165,150 @@
   };
 
   # ---------------------------------------------------------------------------
+  # ssh — hardened client config (~/.ssh/config)
+  # ---------------------------------------------------------------------------
+  # Home Manager now owns ~/.ssh/config; the previous hand-written file is
+  # backed up on first activation (home-manager.backupFileExtension). Design:
+  #   * enableDefaultConfig = false — opt out of HM's soon-to-be-deprecated
+  #     built-in `Host *` defaults so `settings."*"` below is the single source
+  #     of global defaults (otherwise both fight and HM warns).
+  #   * includes — the OrbStack and Colima helper configs are re-emitted via a
+  #     single `Include` at the very top of the file (before any Host block),
+  #     which is exactly where OrbStack requires its include to sit.
+  #   * Each short host alias carries a `Tag` (work | personal); the two
+  #     `Match tagged …` blocks below attach the right identity + agent policy
+  #     per realm. ssh sets Tag when the alias block matches and only then
+  #     evaluates `Match tagged`, so the alias blocks must be emitted first —
+  #     hence the DAG ordering (lib.hm.dag.entryAfter hostAliases).
+  #   * ssh_config is first-value-wins, so host/match blocks (emitted before
+  #     `*`) override the global `*` defaults where they overlap.
+  programs.ssh = {
+    enable = true;
+    enableDefaultConfig = false;
+
+    includes = [
+      "~/.orbstack/ssh/config" # OrbStack Linux machines (the `orb` host)
+      "~/.colima/ssh_config" # Colima VM
+    ];
+
+    settings =
+      let
+        # Modern, post-quantum-forward crypto (macOS ships OpenSSH 10.x).
+        modernKex = [
+          "sntrup761x25519-sha512@openssh.com"
+          "curve25519-sha256"
+          "curve25519-sha256@libssh.org"
+          "diffie-hellman-group18-sha512"
+          "diffie-hellman-group16-sha512"
+        ];
+        modernCiphers = [
+          "chacha20-poly1305@openssh.com"
+          "aes256-gcm@openssh.com"
+          "aes128-gcm@openssh.com"
+          "aes256-ctr"
+        ];
+        modernMACs = [
+          "hmac-sha2-512-etm@openssh.com"
+          "hmac-sha2-256-etm@openssh.com"
+          "umac-128-etm@openssh.com"
+        ];
+        pubkeyAlgos = [
+          "ssh-ed25519"
+          "ssh-ed25519-cert-v01@openssh.com"
+          "sk-ssh-ed25519@openssh.com"
+          "sk-ssh-ed25519-cert-v01@openssh.com"
+          "rsa-sha2-512"
+          "rsa-sha2-256"
+        ];
+
+        # `Match tagged …` blocks must be emitted after every tagged alias.
+        hostAliases = [
+          "rpi"
+          "gh"
+          "github.com"
+          "air"
+          "linux-builder"
+        ];
+      in
+      {
+        # --- short aliases: personal ---
+        "rpi" = {
+          HostName = "rpi.local";
+          User = "dz0ny";
+          Tag = "personal";
+        };
+        "gh" = {
+          HostName = "github.com";
+          User = "git";
+          Tag = "personal";
+        };
+        # Canonical github.com so plain `git@github.com:…` remotes match too.
+        "github.com" = {
+          User = "git";
+          Tag = "personal";
+        };
+
+        # --- short aliases: work ---
+        "air" = {
+          HostName = "air.radioterminal.si";
+          User = "dz0ny";
+          Tag = "work";
+        };
+
+        # --- nix linux-builder: self-contained, dedicated key ---
+        "linux-builder" = {
+          HostName = "localhost";
+          User = "builder";
+          Port = 31022;
+          HostKeyAlias = "linux-builder";
+          IdentityFile = "/etc/nix/builder_ed25519";
+          IdentitiesOnly = true;
+        };
+
+        # --- per-realm identity + agent policy (Match blocks) ---
+        "match-personal" = lib.hm.dag.entryAfter hostAliases {
+          header = "Match tagged personal";
+          IdentityFile = "~/.ssh/id_ed25519";
+          IdentitiesOnly = true;
+        };
+        "match-work" = lib.hm.dag.entryAfter hostAliases {
+          header = "Match tagged work";
+          # TODO: swap in a dedicated work key when one is provisioned; for now
+          # work reuses the personal ed25519 key so existing hosts keep working.
+          IdentityFile = "~/.ssh/id_ed25519";
+          IdentitiesOnly = true;
+        };
+
+        # --- global defaults (rendered last; earlier blocks win on overlap) ---
+        "*" = {
+          AddKeysToAgent = "yes"; # add keys to the agent on first use
+          UseKeychain = true; # load key passphrases from the macOS Keychain
+          ForwardAgent = false; # never forward the agent by default
+          HashKnownHosts = true; # hash hostnames/IPs in ~/.ssh/known_hosts
+          Compression = false;
+          ServerAliveInterval = 60;
+          ServerAliveCountMax = 3;
+          ControlMaster = "auto"; # multiplex connections…
+          ControlPath = "~/.ssh/sockets/%C"; # …over a short hashed socket name
+          ControlPersist = "10m";
+          StrictHostKeyChecking = "ask";
+          VerifyHostKeyDNS = "ask";
+          KexAlgorithms = modernKex;
+          Ciphers = modernCiphers;
+          MACs = modernMACs;
+          HostKeyAlgorithms = pubkeyAlgos;
+          PubkeyAcceptedAlgorithms = pubkeyAlgos;
+        };
+      };
+  };
+
+  # ControlMaster multiplexing socket directory (ssh will not create it).
+  home.activation.sshSocketDir = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    run mkdir -p $VERBOSE_ARG "$HOME/.ssh/sockets"
+    run chmod 700 "$HOME/.ssh/sockets"
+  '';
+
+  # ---------------------------------------------------------------------------
   # mise — global runtime toolchain (~/.config/mise/config.toml)
   # ---------------------------------------------------------------------------
   # mise itself is installed via Homebrew and activated in the zsh initContent
