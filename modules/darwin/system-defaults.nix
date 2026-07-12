@@ -16,6 +16,18 @@
     # Spring-loaded folders enabled with a 0.5s hover delay.
     "com.apple.springing.enabled" = true;
     "com.apple.springing.delay" = 0.5;
+    # Always show scrollbars and jump to the clicked spot when paging.
+    AppleShowScrollBars = "Always";
+    AppleScrollerPagingBehavior = true;
+    # Full keyboard access: Tab moves focus to all controls.
+    AppleKeyboardUIMode = 3;
+    # Expand save and print panels by default.
+    NSNavPanelExpandedStateForSaveMode = true;
+    NSNavPanelExpandedStateForSaveMode2 = true;
+    PMPrintingExpandedStateForPrint = true;
+    PMPrintingExpandedStateForPrint2 = true;
+    # Medium (32px) sidebar icon size in Finder and elsewhere.
+    NSTableViewDefaultSizeMode = 2;
   };
   system.defaults.WindowManager = {
     AppWindowGroupingBehavior = true;
@@ -59,6 +71,12 @@
     ShowHardDrivesOnDesktop = false;
     ShowExternalHardDrivesOnDesktop = false;
     ShowRemovableMediaOnDesktop = false;
+    # Show the full POSIX path in the Finder window title.
+    _FXShowPosixPathInTitle = true;
+    # Show hidden dotfiles in Finder.
+    AppleShowAllFiles = true;
+    # Search the current folder by default instead of the whole Mac.
+    FXDefaultSearchScope = "SCcf";
   };
   system.defaults.magicmouse = {
     MouseButtonMode = "OneButton";
@@ -70,7 +88,22 @@
   };
   system.defaults.trackpad = {
     TrackpadThreeFingerTapGesture = 2;
+    # Lightest touch for Force Click and haptic feedback thresholds.
+    FirstClickThreshold = 0;
+    SecondClickThreshold = 0;
   };
+  system.defaults.screencapture = {
+    # No drop shadow around captured windows.
+    disable-shadow = true;
+  };
+  system.defaults.screensaver = {
+    # Require the password 10s after sleep/screensaver starts.
+    askForPasswordDelay = 10;
+  };
+
+  # Remap the non-US "tilde" key (ISO layouts) to the expected position.
+  system.keyboard.enableKeyMapping = true;
+  system.keyboard.nonUS.remapTilde = true;
 
   # ---------------------------------------------------------------------------
   # Settings without a typed nix-darwin option, written verbatim to their
@@ -108,6 +141,36 @@
     "com.apple.screencapture" = {
       showsClicks = true;
       captureHDR = true;
+    };
+
+    # Spotlight search-result categories. On the live machine every category
+    # is disabled except SOURCE, so Spotlight only surfaces that one kind of
+    # result. Mirror that ordering/enablement exactly.
+    "com.apple.Spotlight" = {
+      orderedItems = [
+        { enabled = 0; name = "APPLICATIONS"; }
+        { enabled = 0; name = "MENU_EXPRESSION"; }
+        { enabled = 0; name = "CONTACT"; }
+        { enabled = 0; name = "MENU_CONVERSION"; }
+        { enabled = 0; name = "MENU_DEFINITION"; }
+        { enabled = 0; name = "DOCUMENTS"; }
+        { enabled = 0; name = "EVENT_TODO"; }
+        { enabled = 0; name = "DIRECTORIES"; }
+        { enabled = 0; name = "FONTS"; }
+        { enabled = 0; name = "IMAGES"; }
+        { enabled = 0; name = "MESSAGES"; }
+        { enabled = 0; name = "MOVIES"; }
+        { enabled = 0; name = "MUSIC"; }
+        { enabled = 0; name = "MENU_OTHER"; }
+        { enabled = 0; name = "PDF"; }
+        { enabled = 0; name = "PRESENTATIONS"; }
+        { enabled = 0; name = "MENU_SPOTLIGHT_SUGGESTIONS"; }
+        { enabled = 0; name = "SPREADSHEETS"; }
+        { enabled = 0; name = "SYSTEM_PREFS"; }
+        { enabled = 0; name = "TIPS"; }
+        { enabled = 0; name = "BOOKMARKS"; }
+        { enabled = 1; name = "SOURCE"; }
+      ];
     };
 
     # Keyboard input sources: Croatian-PC (primary) + Slovenian, plus the
