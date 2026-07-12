@@ -14,3 +14,7 @@ result-*
 # Local overrides/secrets
 .env
 .envrc.local
+
+# Generated report from scripts/capture-state.sh (the script is tracked, its
+# large output is not).
+scripts/capture-state.out

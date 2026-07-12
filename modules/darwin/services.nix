@@ -26,6 +26,30 @@
   };
 
   # ------------------------------------------------------------
+  # launchd audit (captured 2026-07-11 from Janezs-Mac-mini)
+  # ------------------------------------------------------------
+  # A full sweep of the live machine (~/Library/LaunchAgents,
+  # /Library/Launch{Agents,Daemons}, and `launchctl list`) found NO
+  # hand-authored user launchd jobs. Every non-Apple launchd item belongs to
+  # an application that installs and manages its own plist:
+  #
+  #   Setapp            com.setapp.DesktopClient.*   (cask "setapp")
+  #   Google Keystone   com.google.keystone.*        (Chrome/Google casks)
+  #   Zoom              us.zoom.*                     (cask "zoom")
+  #   Privileges        corp.sap.privileges.*         (cask "privileges")
+  #   OrbStack          dev.orbstack.*                (cask "orbstack")
+  #   Proton Drive      ch.protonmail.drive.*         (cask "proton-drive")
+  #   Tailscale         io.tailscale.ipn.*            (cask "tailscale")
+  #   Determinate Nix   systems.determinate.* / org.nixos.activate-system
+  #
+  # Login items (Pareto Security, Stats, Raycast, Android File Transfer Agent)
+  # are likewise registered by the apps themselves via SMAppService, not by
+  # nix-darwin. All of these reappear automatically once the corresponding
+  # Homebrew casks (see .nixmac/homebrew/data.json) are installed on a
+  # replacement Mac, so there is nothing to declare here. Re-run
+  # `scripts/capture-state.sh` to refresh this audit.
+
+  # ------------------------------------------------------------
   # System-wide LaunchDaemons (runs as root)
   # ------------------------------------------------------------
   # launchd.daemons = {
