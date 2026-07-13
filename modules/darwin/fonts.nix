@@ -13,14 +13,11 @@
   #   manual steps here if required by other tooling.
   #
   fonts.packages = with pkgs; [
-    # Programming fonts for the terminal and prompt. The Nerd Font variants
-    # bundle patched glyphs (powerline symbols, icons) used by Ghostty (see
-    # modules/home/dz0ny.nix), starship, and lazygit.
+    # Programming font used by Ghostty (see modules/home/dz0ny.nix). The Nerd
+    # Font variant bundles glyphs used by lazygit.
     # NOTE: on nixpkgs-unstable Nerd Fonts are namespaced under `nerd-fonts.*`
     # (the old `nerdfonts.override { fonts = [...]; }` was removed).
     nerd-fonts.jetbrains-mono
-    nerd-fonts.fira-code
-    nerd-fonts.hack
   ];
 
   # Document any macOS-specific font handling or pitfalls here for future
