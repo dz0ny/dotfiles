@@ -11,8 +11,14 @@
     # Force Click / haptic feedback enabled on the trackpad.
     "com.apple.trackpad.forceClick" = true;
     AppleShowAllExtensions = true;
-    InitialKeyRepeat = 15;
-    KeyRepeat = 2;
+    # Snappy keyboard: short initial delay before repeat, then the fastest repeat.
+    InitialKeyRepeat = 10;
+    KeyRepeat = 1;
+    # Disable press-and-hold accent popover so holding a key repeats it instead.
+    ApplePressAndHoldEnabled = false;
+    # Instant window open/close/resize animations.
+    NSAutomaticWindowAnimationsEnabled = false;
+    NSWindowResizeTime = 0.001;
     # Spring-loaded folders enabled with a 0.5s hover delay.
     "com.apple.springing.enabled" = true;
     "com.apple.springing.delay" = 0.5;
@@ -129,6 +135,11 @@
           "with" = "On my way!";
         }
       ];
+    };
+
+    # Disable Finder animations (window open, info panel, etc.) for snappier feel.
+    "com.apple.finder" = {
+      DisableAllAnimations = true;
     };
 
     # Don't scatter .DS_Store files onto network shares or USB volumes.
