@@ -66,6 +66,16 @@
       if [ -x "$HOME/.local/bin/mise" ]; then
         eval "$("$HOME/.local/bin/mise" activate zsh)"
       fi
+
+      # fzf history on Alt-R (⌥R) instead of Ctrl-R. Ctrl-R is unreliable across
+      # terminals/multiplexers (often swallowed as a redraw/flow-control key),
+      # so move fzf's history widget to ⌥R — which Ghostty emits as a clean
+      # `^[r` escape thanks to macos-option-as-alt = true — and hand Ctrl-R back
+      # to zsh's native incremental reverse-search as a fallback. This runs after
+      # the fzf zsh integration (injected earlier by programs.fzf), so the
+      # fzf-history-widget already exists.
+      bindkey '^[r' fzf-history-widget
+      bindkey '^r'  history-incremental-search-backward
     '';
   };
 
@@ -181,7 +191,8 @@
   };
 
   # ---------------------------------------------------------------------------
-  # fzf — fuzzy finder (Ctrl-R history, Ctrl-T files, Alt-C cd)
+  # fzf — fuzzy finder (Alt-R history, Ctrl-T files, Alt-C cd)
+  # History is rebound from Ctrl-R to Alt-R in the zsh initContent above.
   # ---------------------------------------------------------------------------
   programs.fzf = {
     enable = true;
