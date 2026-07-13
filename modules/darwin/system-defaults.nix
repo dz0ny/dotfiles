@@ -35,6 +35,7 @@
     # Medium (32px) sidebar icon size in Finder and elsewhere.
     NSTableViewDefaultSizeMode = 2;
   };
+  system.defaults.LaunchServices.LSQuarantine = true;
   system.defaults.WindowManager = {
     AppWindowGroupingBehavior = true;
     AutoHide = true;

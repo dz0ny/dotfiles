@@ -14,6 +14,13 @@
   #   here alongside examples.
 
   networking = {
+    # Keep the macOS application firewall enabled and avoid responding to
+    # unsolicited probes that are not for an allowed application.
+    applicationFirewall = {
+      enable = true;
+      enableStealthMode = true;
+    };
+
     # Override the host name for the machine if needed:
     # hostName = "my-macbook";
 
