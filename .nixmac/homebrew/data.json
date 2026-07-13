@@ -4,11 +4,8 @@
     "cocoapods",
     "fastlane",
     "gh",
-    "graphicsmagick",
     "heroku",
-    "mise",
     "mole",
-    "rclone",
     "rtk"
   ],
   "casks": [

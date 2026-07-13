@@ -67,6 +67,90 @@
   };
 
   # ---------------------------------------------------------------------------
+  # starship — cross-shell prompt
+  # ---------------------------------------------------------------------------
+  # The zsh integration hook is injected automatically (enableZshIntegration
+  # defaults to true), so nothing extra is needed in the zsh initContent above.
+  # Theme matches Ghostty's Catppuccin Mocha; symbols assume the JetBrainsMono
+  # Nerd Font already configured for the terminal.
+  programs.starship = {
+    enable = true;
+    # Build without the default `notify` feature. It pulls in `notify-rust` ->
+    # `mac-notification-sys`, whose AppKit/Foundation link step crashes the
+    # cctools linker on this Darwin toolchain (ld Trace/BPT trap: 5), which
+    # breaks the whole system build. Desktop notifications aren't used here, so
+    # keep only `battery` from the default feature set.
+    package = pkgs.starship.overrideAttrs (old: {
+      cargoBuildNoDefaultFeatures = true;
+      cargoBuildFeatures = [ "battery" ];
+      cargoCheckNoDefaultFeatures = true;
+      cargoCheckFeatures = [ "battery" ];
+    });
+    settings = {
+      palette = "catppuccin_mocha";
+
+      # Keep the prompt on two lines: info line, then the input caret.
+      format = lib.concatStrings [
+        "$directory"
+        "$git_branch"
+        "$git_status"
+        "$nix_shell"
+        "$cmd_duration"
+        "$line_break"
+        "$character"
+      ];
+
+      character = {
+        success_symbol = "[❯](green)";
+        error_symbol = "[❯](red)";
+        vimcmd_symbol = "[❮](green)";
+      };
+
+      directory = {
+        style = "blue";
+        truncation_length = 4;
+        truncate_to_repo = true;
+        read_only = " 󰌾";
+      };
+
+      git_branch = {
+        symbol = " ";
+        style = "mauve";
+      };
+      git_status.style = "red";
+
+      nix_shell = {
+        symbol = " ";
+        style = "sky";
+        format = "[$symbol$name]($style) ";
+      };
+
+      cmd_duration = {
+        min_time = 2000;
+        style = "yellow";
+        format = "[ $duration]($style) ";
+      };
+
+      palettes.catppuccin_mocha = {
+        rosewater = "#f5e0dc";
+        flamingo = "#f2cdcd";
+        pink = "#f5c2e7";
+        mauve = "#cba6f7";
+        red = "#f38ba8";
+        maroon = "#eba0ac";
+        peach = "#fab387";
+        yellow = "#f9e2af";
+        green = "#a6e3a1";
+        teal = "#94e2d5";
+        sky = "#89dceb";
+        sapphire = "#74c7ec";
+        blue = "#89b4fa";
+        lavender = "#b4befe";
+      };
+    };
+  };
+
+  # ---------------------------------------------------------------------------
   # fzf — fuzzy finder (Ctrl-R history, Ctrl-T files, Alt-C cd)
   # ---------------------------------------------------------------------------
   programs.fzf = {
