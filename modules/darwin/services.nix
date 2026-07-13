@@ -93,6 +93,39 @@
   # `scripts/capture-state.sh` to refresh this audit.
 
   # ------------------------------------------------------------
+  # Weekly Nix garbage collection (runs as root)
+  # ------------------------------------------------------------
+  # This system uses Determinate Nix (nix.enable = false above), so nix-darwin's
+  # high-level `nix.gc` module is unavailable. Instead a plain LaunchDaemon runs
+  # `nix-collect-garbage` weekly as root, which prunes system + all users'
+  # profile generations older than 30 days and then deletes the now-unreferenced
+  # store paths. It talks to the running nix-daemon over its socket, so the
+  # exact nix build used here does not matter.
+  #
+  # Scheduled for Sunday 03:00. StartCalendarInterval fires missed runs shortly
+  # after the Mac next wakes/powers on, so an asleep machine still gets collected.
+  launchd.daemons.nix-gc = {
+    serviceConfig = {
+      Label = "org.nix-darwin.nix-gc";
+      ProgramArguments = [
+        "${pkgs.nix}/bin/nix-collect-garbage"
+        "--delete-older-than"
+        "30d"
+      ];
+      StartCalendarInterval = [
+        {
+          Weekday = 0;
+          Hour = 3;
+          Minute = 0;
+        }
+      ];
+      RunAtLoad = false;
+      StandardOutPath = "/tmp/nix-gc.out.log";
+      StandardErrorPath = "/tmp/nix-gc.err.log";
+    };
+  };
+
+  # ------------------------------------------------------------
   # System-wide LaunchDaemons (runs as root)
   # ------------------------------------------------------------
   # launchd.daemons = {
