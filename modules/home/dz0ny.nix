@@ -91,14 +91,24 @@
     });
     settings = {
       palette = "catppuccin_mocha";
+      add_newline = true;
 
-      # Keep the prompt on two lines: info line, then the input caret.
+      # Two lines: a powerline info bar, then the input caret. Segments are
+      # colored blocks joined by  (Nerd Font powerline separators); each
+      # segment paints its background and borrows the next segment's color as
+      # its own separator foreground so the blocks flow into one another.
       format = lib.concatStrings [
+        "[](surface0)"
+        "$os"
         "$directory"
+        "[](fg:surface0 bg:mauve)"
         "$git_branch"
         "$git_status"
+        "[](fg:mauve bg:sky)"
         "$nix_shell"
+        "[](fg:sky bg:surface0)"
         "$cmd_duration"
+        "[](surface0)"
         "$line_break"
         "$character"
       ];
@@ -109,29 +119,43 @@
         vimcmd_symbol = "[❮](green)";
       };
 
+      os = {
+        disabled = false;
+        style = "bg:surface0 fg:text";
+        format = "[ $symbol ]($style)";
+        symbols.Macos = "";
+      };
+
       directory = {
-        style = "blue";
+        style = "bg:surface0 fg:blue";
+        format = "[ $path ]($style)";
         truncation_length = 4;
         truncate_to_repo = true;
+        truncation_symbol = "…/";
         read_only = " 󰌾";
+        read_only_style = "bg:surface0 fg:red";
       };
 
       git_branch = {
-        symbol = " ";
-        style = "mauve";
+        symbol = "";
+        style = "bg:mauve fg:crust";
+        format = "[ $symbol $branch ]($style)";
       };
-      git_status.style = "red";
+      git_status = {
+        style = "bg:mauve fg:crust";
+        format = "[($all_status$ahead_behind )]($style)";
+      };
 
       nix_shell = {
-        symbol = " ";
-        style = "sky";
-        format = "[$symbol$name]($style) ";
+        symbol = "";
+        style = "bg:sky fg:crust";
+        format = "[ $symbol $name ]($style)";
       };
 
       cmd_duration = {
         min_time = 2000;
-        style = "yellow";
-        format = "[ $duration]($style) ";
+        style = "bg:surface0 fg:yellow";
+        format = "[  $duration ]($style)";
       };
 
       palettes.catppuccin_mocha = {
@@ -149,6 +173,9 @@
         sapphire = "#74c7ec";
         blue = "#89b4fa";
         lavender = "#b4befe";
+        text = "#cdd6f4";
+        surface0 = "#313244";
+        crust = "#11111b";
       };
     };
   };
