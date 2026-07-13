@@ -22,6 +22,11 @@
   # To disable this feature, comment out or remove the line below:
   security.pam.services.sudo_local.touchIdAuth = true;
 
+  # Also allow Apple Watch to authorize sudo. Useful when the lid is closed or
+  # Touch ID is otherwise unavailable; requires "Use your Apple Watch to unlock
+  # apps and your Mac" to be enabled in System Settings.
+  security.pam.services.sudo_local.watchIdAuth = true;
+
   # ============================================================================
   # Security examples and guidance (macOS / nix-darwin)
   # ============================================================================
