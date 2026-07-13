@@ -19,10 +19,7 @@
   # $ darwin-rebuild switch --flake .#Scotts-MacBook-Pro-2
 
   environment.systemPackages = with pkgs; [
-    # Example packages (uncomment or add your own):
-    # git   # version control
-    # vim   # editor
-    # htop  # process viewer
+    nixfmt-rfc-style # official RFC 166 Nix code formatter (also wired up as `nix fmt`)
   ];
 
   # If you prefer per-user profiles, consider using `home-manager` instead

@@ -82,6 +82,9 @@
         };
     in
     {
+      # Nix code formatter (run with `nix fmt`).
+      formatter."aarch64-darwin" = nixpkgs.legacyPackages."aarch64-darwin".nixfmt-rfc-style;
+
       # Build darwin flake using:
       # $ darwin-rebuild build --flake .#Janezs-Mac-mini
       darwinConfigurations."Janezs-Mac-mini" = nix-darwin.lib.darwinSystem {
@@ -102,9 +105,9 @@
           ./modules/darwin/sops-secrets.nix
           ./modules/darwin/users.nix
           ./nix-overlays.nix
-        
+
           ./modules/darwin/system-defaults.nix
-];
+        ];
       };
     };
 }
