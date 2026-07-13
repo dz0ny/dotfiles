@@ -154,9 +154,8 @@
       captureHDR = true;
     };
 
-    # Spotlight search-result categories. On the live machine every category
-    # is disabled except SOURCE, so Spotlight only surfaces that one kind of
-    # result. Mirror that ordering/enablement exactly.
+    # Hide every Spotlight search-result category. Indexing and Spotlight
+    # activity are disabled system-wide in services.nix as well.
     "com.apple.Spotlight" = {
       orderedItems = [
         {
@@ -244,7 +243,7 @@
           name = "BOOKMARKS";
         }
         {
-          enabled = 1;
+          enabled = 0;
           name = "SOURCE";
         }
       ];

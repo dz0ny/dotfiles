@@ -25,6 +25,19 @@
     # yabai.enable = true;
   };
 
+  # Disable both macOS background facilities whenever the configuration is
+  # activated. `mdutil -d` disables all Spotlight activity, while `-i off`
+  # also records indexing as disabled for every available volume. Time Machine
+  # is stopped first in case a backup is running, then automatic backups are
+  # disabled. The commands are idempotent.
+  system.activationScripts.disable-spotlight-and-time-machine.text = ''
+    echo >&2 "disabling Spotlight and Time Machine..."
+    /usr/bin/mdutil -a -i off || true
+    /usr/bin/mdutil -a -d || true
+    /usr/bin/tmutil stopbackup || true
+    /usr/bin/tmutil disable
+  '';
+
   # ------------------------------------------------------------
   # launchd audit (captured 2026-07-11 from Janezs-Mac-mini)
   # ------------------------------------------------------------
