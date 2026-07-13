@@ -3,8 +3,9 @@
 # Home Manager configuration for the primary user `dz0ny`.
 #
 # Purpose:
-# - Own the daily-coding terminal declaratively: shell, git, and the handful of
-#   CLI tools used constantly (fzf, ripgrep, fd, jq, lazygit, devenv).
+# - Own the daily-coding terminal declaratively: shell, git, and the CLI
+#   toolkit used constantly (fzf, ripgrep, fd, bat, eza, zoxide, jq, yq, htop,
+#   lazygit, devenv).
 # - Manage the dotfiles for those tools (~/.zshrc, ~/.gitconfig,
 #   ~/.config/ghostty/config, ...).
 #
@@ -25,6 +26,8 @@
     ripgrep # fast recursive search (rg)
     fd # fast, user-friendly find
     jq # JSON processor
+    yq-go # YAML/XML/TOML processor (yq)
+    htop # interactive process viewer
     devenv # per-project developer environments (devenv shell / devenv up)
   ];
 
@@ -45,8 +48,8 @@
       share = true;
     };
 
+    # `ls`/`ll`/`la`/`lt` are provided by the eza module below (zsh integration).
     shellAliases = {
-      ll = "ls -lah";
       lg = "lazygit";
     };
 
@@ -161,6 +164,32 @@
     fileWidgetCommand = "fd --type f --hidden --follow --exclude .git";
     changeDirWidgetCommand = "fd --type d --hidden --follow --exclude .git";
   };
+
+  # ---------------------------------------------------------------------------
+  # bat — cat(1) clone with syntax highlighting
+  # ---------------------------------------------------------------------------
+  programs.bat = {
+    enable = true;
+    config.theme = "Catppuccin-mocha"; # matches the Ghostty / starship theme
+  };
+
+  # ---------------------------------------------------------------------------
+  # eza — modern ls(1) replacement
+  # ---------------------------------------------------------------------------
+  # enableZshIntegration adds ls/ll/la/lt aliases pointing at eza. This
+  # supersedes the hand-rolled `ll` alias in the zsh block above (eza wins
+  # since the module aliases are appended after shellAliases).
+  programs.eza = {
+    enable = true;
+    git = true;
+    icons = "auto"; # requires the Nerd Font already set in Ghostty
+  };
+
+  # ---------------------------------------------------------------------------
+  # zoxide — smarter cd that learns your most-used directories (z / zi)
+  # ---------------------------------------------------------------------------
+  # The zsh hook is injected automatically (enableZshIntegration defaults true).
+  programs.zoxide.enable = true;
 
   # ---------------------------------------------------------------------------
   # lazygit — terminal UI for git
