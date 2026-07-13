@@ -484,11 +484,13 @@
   # ---------------------------------------------------------------------------
   # Ghostty.app itself is installed via Homebrew cask (see
   # .nixmac/homebrew/data.json). We only own its config here so the readable
-  # theme + font are declarative. Ghostty ships the
-  # Catppuccin themes built in; "catppuccin-mocha" is a high-contrast, readable
-  # dark theme.
+  # theme + font are declarative. Ghostty ships the Catppuccin themes built in
+  # and can follow the macOS system appearance: `light:…,dark:…` swaps to
+  # Catppuccin Latte in Light mode and Mocha in Dark mode automatically. The
+  # starship powerline prompt is background-independent (each segment paints its
+  # own bg/fg), so it stays readable under either theme.
   home.file.".config/ghostty/config".text = ''
-    theme = catppuccin-mocha
+    theme = light:catppuccin-latte,dark:catppuccin-mocha
 
     font-family = JetBrainsMono Nerd Font
     font-size = 14
