@@ -74,8 +74,15 @@
           # Primary user (required by nix-darwin for homebrew, system.defaults, etc.)
           system.primaryUser = "dz0ny";
 
-          # Disable Homebrew management through nix-darwin
-          homebrew.enable = false;
+          # Enable Homebrew management through nix-darwin
+          homebrew.enable = true;
+
+          # Never uninstall Homebrew packages that aren't declared here. We only
+          # want nix-darwin to *ensure* the packages in .nixmac/homebrew/data.json
+          # are installed — apps installed manually via `brew` stay untouched.
+          # ("uninstall"/"zap" would remove anything not listed; "none" leaves
+          # existing installs alone.)
+          homebrew.onActivation.cleanup = "none";
 
           # Enable if you want to allow unfree packages (e.g. some fonts, or certain applications). Leave false to avoid them entirely.
           # nixpkgs.config.allowUnfree = true;

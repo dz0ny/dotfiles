@@ -213,6 +213,22 @@
     userName = "Janez T";
     userEmail = "hey@dz0ny.dev";
 
+    # git-delta — syntax-highlighting pager for `git diff`/`show`/`log -p`.
+    # Enabling it installs the `delta` binary and wires it as core.pager +
+    # interactive.diffFilter (for `git add -p`).
+    delta = {
+      enable = true;
+      options = {
+        navigate = true; # n/N to jump between diff hunks
+        line-numbers = true;
+        syntax-theme = "Catppuccin-mocha"; # matches bat / starship / Ghostty
+      };
+    };
+
+    # git-lfs — large file storage. Enabling installs the binary and adds the
+    # required `filter.lfs` smudge/clean/process config.
+    lfs.enable = true;
+
     aliases = {
       pp = "push --force-with-lease";
       up = "pull origin main";
