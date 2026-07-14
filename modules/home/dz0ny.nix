@@ -281,30 +281,16 @@
         }
       ];
 
-      statusLine = {
-        type = "command";
-        command = "bash -c '\"/Users/dz0ny/.bun/bin/bun\" \"$(ls -td ~/.claude/plugins/cache/claude-hud/claude-hud/*/ 2>/dev/null | head -1)src/index.ts\"'";
-      };
-
       enabledPlugins = {
-        "claude-hud@claude-hud" = false;
         "frontend-design@claude-plugins-official" = true;
         "context7@claude-plugins-official" = true;
         "feature-dev@claude-plugins-official" = true;
         "commit-commands@claude-plugins-official" = true;
         "code-simplifier@claude-plugins-official" = true;
-        "ralph-loop@claude-plugins-official" = false;
-        "agent-sdk-dev@claude-plugins-official" = false;
-        "plugin-dev@claude-plugins-official" = false;
         "gopls-lsp@claude-plugins-official" = true;
         "swift-lsp@claude-plugins-official" = true;
-        "claude-code-setup@claude-plugins-official" = false;
-        "claude-md-management@claude-plugins-official" = false;
         "devenv@devenv-claude" = true;
-        "pyright-lsp@claude-plugins-official" = false;
-        "github@claude-plugins-official" = false;
         "clangd-lsp@claude-plugins-official" = true;
-        "stripe@claude-plugins-official" = false;
         "hakuto@hakuto" = true;
         "cloudflare@claude-plugins-official" = true;
       };
