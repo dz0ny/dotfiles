@@ -20,6 +20,7 @@
 
   environment.systemPackages = with pkgs; [
     nixfmt-rfc-style # official RFC 166 Nix code formatter (also wired up as `nix fmt`)
+    gh # GitHub CLI
   ];
 
   # If you prefer per-user profiles, consider using `home-manager` instead
