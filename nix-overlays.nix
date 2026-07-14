@@ -21,4 +21,11 @@
   nixpkgs.overlays = [
     # Add overlays here
   ];
+
+  # Allow the single unfree package we install declaratively — Claude Code
+  # (Anthropic's CLI, installed via programs.claude-code in
+  # modules/home/dz0ny.nix). Scope the exception to just that package so the
+  # rest of the system stays free-only instead of flipping `allowUnfree` on
+  # globally. `useGlobalPkgs = true` means Home Manager inherits this config.
+  nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [ "claude-code" ];
 }

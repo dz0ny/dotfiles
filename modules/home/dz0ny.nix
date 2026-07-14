@@ -240,6 +240,94 @@
   };
 
   # ---------------------------------------------------------------------------
+  # claude-code — Anthropic's CLI, installed and configured declaratively
+  # ---------------------------------------------------------------------------
+  # The nix package is unfree; the exception is whitelisted per-package in
+  # nix-overlays.nix (allowUnfreePredicate) rather than enabling unfree
+  # globally. Home Manager owns three things here:
+  #   * the `claude` binary (added to the user profile),
+  #   * ~/.claude/settings.json (from `settings` below), and
+  #   * ~/.claude/CLAUDE.md (from `context`).
+  # Trade-off worth knowing: settings.json and CLAUDE.md become read-only
+  # symlinks into the nix store, so runtime edits (e.g. `/config`, toggling a
+  # plugin, "always allow") won't stick — change them here instead. The
+  # settings below are a verbatim port of the previous hand-written
+  # ~/.claude/settings.json (backed up to settings.json.hm-backup on first
+  # activation). ~/.claude/settings.local.json is intentionally NOT managed:
+  # Claude Code keeps writing session-approved allow rules there and merges it
+  # over settings.json at runtime, so it stays the mutable overlay.
+  # ~/.claude/CLAUDE.md held only `@RTK.md`, preserved verbatim in `context`;
+  # ~/.claude/RTK.md itself is unmanaged and stays in place.
+  programs.claude-code = {
+    enable = true;
+
+    settings = {
+      env = {
+        ANTHROPIC_DEFAULT_HAIKU_MODEL = "claude-sonnet-4-6[1m]";
+        ANTHROPIC_DEFAULT_SONNET_MODEL = "claude-sonnet-4-6[1m]";
+      };
+
+      permissions.defaultMode = "auto";
+
+      hooks.PreToolUse = [
+        {
+          matcher = "Bash";
+          hooks = [
+            {
+              type = "command";
+              command = "rtk hook claude";
+            }
+          ];
+        }
+      ];
+
+      statusLine = {
+        type = "command";
+        command = "bash -c '\"/Users/dz0ny/.bun/bin/bun\" \"$(ls -td ~/.claude/plugins/cache/claude-hud/claude-hud/*/ 2>/dev/null | head -1)src/index.ts\"'";
+      };
+
+      enabledPlugins = {
+        "claude-hud@claude-hud" = false;
+        "frontend-design@claude-plugins-official" = true;
+        "context7@claude-plugins-official" = true;
+        "feature-dev@claude-plugins-official" = true;
+        "commit-commands@claude-plugins-official" = true;
+        "code-simplifier@claude-plugins-official" = true;
+        "ralph-loop@claude-plugins-official" = false;
+        "agent-sdk-dev@claude-plugins-official" = false;
+        "plugin-dev@claude-plugins-official" = false;
+        "gopls-lsp@claude-plugins-official" = true;
+        "swift-lsp@claude-plugins-official" = true;
+        "claude-code-setup@claude-plugins-official" = false;
+        "claude-md-management@claude-plugins-official" = false;
+        "devenv@devenv-claude" = true;
+        "pyright-lsp@claude-plugins-official" = false;
+        "github@claude-plugins-official" = false;
+        "clangd-lsp@claude-plugins-official" = true;
+        "stripe@claude-plugins-official" = false;
+        "hakuto@hakuto" = true;
+        "cloudflare@claude-plugins-official" = true;
+      };
+
+      extraKnownMarketplaces.hakuto.source = {
+        source = "github";
+        repo = "teamniteo/hakuto";
+      };
+
+      effortLevel = "medium";
+      tui = "fullscreen";
+      skipDangerousModePermissionPrompt = true;
+      theme = "auto";
+      agentPushNotifEnabled = true;
+      skipAutoPermissionPrompt = true;
+    };
+
+    context = ''
+      @RTK.md
+    '';
+  };
+
+  # ---------------------------------------------------------------------------
   # git — with SSH commit signing
   # ---------------------------------------------------------------------------
   # Ports the previous ~/.gitconfig verbatim and adds SSH signing. The signing
