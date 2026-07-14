@@ -8,7 +8,7 @@ This is a nix-darwin + Home Manager flake managing a single Apple Silicon Mac mi
 ## Packages
 Very little is installed at the system level; almost all day-to-day tooling comes through Home Manager for the `dz0ny` user, and GUI apps come through Homebrew.
 
-- **System profile** (`modules/darwin/packages.nix` + flake): `vim`, `nixfmt-rfc-style`, and `syncthing` (the sync daemon binary, run as a per-user LaunchAgent — see Services).
+- **System profile** (`modules/darwin/packages.nix` + flake): `vim` and `nixfmt-rfc-style`.
 - **User CLI tools** (`modules/home/dz0ny.nix`): `ripgrep` (`rg`), `fd`, `jq`, `yq-go` (`yq`), `htop`, and `devenv` for per-project dev shells (`devenv shell` / `devenv up`).
 - **Program modules** that install a binary *and* wire up config: `fzf`, `bat`, `eza`, `zoxide`, `lazygit`, `starship`, `git` (with `delta` and `git-lfs`).
 
@@ -52,9 +52,8 @@ A large, opinionated set of `system.defaults` in `modules/darwin/system-defaults
 - Magic Mouse is single-button.
 
 ## Services
-There are almost no declared services — this module runs one hand-authored user agent and actively disables two macOS background facilities on every rebuild.
+There are almost no declared services — this module actively disables two macOS background facilities on every rebuild and runs a weekly Nix garbage collection.
 
-- **Syncthing** (`launchd.user.agents.syncthing`, `modules/darwin/services.nix`): nix-darwin has no high-level `services.syncthing` module, so the daemon from `pkgs.syncthing` is wired up as a per-user LaunchAgent (Label `io.syncthing.syncthing`) that runs `syncthing serve --no-browser --no-restart --gui-address=127.0.0.1:8384`. launchd supervises it (`KeepAlive`, `RunAtLoad`, `ProcessType = "Background"`, logs to `/tmp/syncthing.out.log` / `/tmp/syncthing.err.log`) — `--no-restart` hands restarts to launchd rather than Syncthing's own restarter. The web UI is bound to loopback only (`127.0.0.1:8384`), reachable at http://127.0.0.1:8384 from this Mac and never exposed on the network.
 - On each activation, `system.activationScripts.disable-spotlight-and-time-machine` runs `mdutil -a -i off` / `mdutil -a -d` to fully disable Spotlight indexing, then `tmutil stopbackup` and `tmutil disable` to turn off Time Machine. The commands are idempotent. (Spotlight result categories are also all hidden in the defaults.)
 - No high-level nix-darwin services (`tailscale`, `yabai`, etc.) are enabled, and no launchd daemons exist.
 - Per the captured audit (2026-07-11), every non-Apple launchd item — Setapp, Google Keystone, Zoom, Privileges, OrbStack, Proton Drive, Tailscale, Determinate Nix — is installed and managed by its own app/cask, so nothing needs to be declared here. Re-run `scripts/capture-state.sh` to refresh that audit.

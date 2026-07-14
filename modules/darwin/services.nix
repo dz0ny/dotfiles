@@ -25,36 +25,6 @@
     # yabai.enable = true;
   };
 
-  # ------------------------------------------------------------
-  # Syncthing (continuous folder sync)
-  # ------------------------------------------------------------
-  # nix-darwin has no high-level `services.syncthing` module, so Syncthing is
-  # wired up as a per-user LaunchAgent instead. The binary comes from
-  # `pkgs.syncthing` (declared in packages.nix). The daemon keeps folders in
-  # sync with this user's other devices and launchd restarts it via KeepAlive.
-  #
-  # The web UI is bound to 127.0.0.1:8384 (loopback only) so it is never
-  # exposed on the network; reach it at http://127.0.0.1:8384 from this Mac.
-  # `--no-browser` stops it from opening a browser on start and `--no-restart`
-  # hands process supervision to launchd rather than Syncthing's own restarter.
-  launchd.user.agents.syncthing = {
-    serviceConfig = {
-      Label = "io.syncthing.syncthing";
-      ProgramArguments = [
-        "${pkgs.syncthing}/bin/syncthing"
-        "serve"
-        "--no-browser"
-        "--no-restart"
-        "--gui-address=127.0.0.1:8384"
-      ];
-      KeepAlive = true;
-      RunAtLoad = true;
-      ProcessType = "Background";
-      StandardOutPath = "/tmp/syncthing.out.log";
-      StandardErrorPath = "/tmp/syncthing.err.log";
-    };
-  };
-
   # Disable both macOS background facilities whenever the configuration is
   # activated. `mdutil -d` disables all Spotlight activity, while `-i off`
   # also records indexing as disabled for every available volume. Time Machine
