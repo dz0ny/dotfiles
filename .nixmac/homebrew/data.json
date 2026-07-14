@@ -5,13 +5,17 @@
     "stripe/stripe-cli/stripe"
   ],
   "casks": [
+    "brave-browser",
     "localsend",
     "proton-pass",
+    "raycast",
+    "rectangle",
     "rustdesk",
     "signal",
+    "slack",
     "tailscale-app",
-    "zed",
-    "teamviewer"
+    "teamviewer",
+    "zed"
   ],
   "taps": [
     "heroku/brew",
