@@ -5,6 +5,9 @@
   programs.claude-code = {
     enable = true;
 
+    # Consume the shared MCP baseline defined in mcp-servers.nix.
+    enableMcpIntegration = true;
+
     settings = {
       env = {
         ANTHROPIC_DEFAULT_HAIKU_MODEL = "claude-sonnet-4-6[1m]";
