@@ -108,6 +108,10 @@
     askForPasswordDelay = 10;
   };
 
+  # Keep the machine awake: never let the computer sleep on idle (mirrors
+  # `pmset -a sleep 0`). Displays and disks may still spin down on their own.
+  power.sleep.computer = "never";
+
   # Remap the non-US "tilde" key (ISO layouts) to the expected position.
   system.keyboard.enableKeyMapping = true;
   system.keyboard.nonUS.remapTilde = true;
