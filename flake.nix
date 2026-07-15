@@ -100,20 +100,8 @@
           ./.nixmac
           inputs.sops-nix.darwinModules.sops
           home-manager.darwinModules.home-manager
-          ./modules/darwin/fonts.nix
-          ./modules/darwin/defaults.nix
-          ./modules/darwin/home.nix
-          ./modules/darwin/environment.nix
-          ./modules/darwin/networking.nix
-          ./modules/darwin/packages.nix
-          ./modules/darwin/security.nix
-          ./modules/darwin/services.nix
-          ./modules/darwin/sops.nix
-          ./modules/darwin/sops-secrets.nix
-          ./modules/darwin/users.nix
+          ./modules/darwin
           ./nix-overlays.nix
-
-          ./modules/darwin/system-defaults.nix
         ];
       };
     };

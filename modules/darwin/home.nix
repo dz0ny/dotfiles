@@ -2,7 +2,8 @@
 
 {
   # Home Manager, wired through nix-darwin. The actual per-user configuration
-  # lives in modules/home/dz0ny.nix to keep this file to just the plumbing.
+  # lives in modules/home/ (split by Configure section) to keep this file to
+  # just the plumbing.
   #
   # Enabled to manage the daily-coding terminal declaratively (zsh, devenv,
   # git signing, fzf, lazygit, ripgrep, fd, jq, Ghostty config).
@@ -15,6 +16,6 @@
     # aside to `<file>.hm-backup` instead of erroring out.
     backupFileExtension = "hm-backup";
 
-    users.dz0ny = import ../home/dz0ny.nix;
+    users.dz0ny = import ../home;
   };
 }
