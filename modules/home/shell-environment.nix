@@ -494,21 +494,27 @@
   # Ghostty — terminal emulator config (~/.config/ghostty/config)
   # ---------------------------------------------------------------------------
   # Ghostty.app itself is installed via Homebrew cask (see
-  # .nixmac/homebrew/data.json). We only own its config here so the readable
-  # theme + font are declarative. Ghostty ships the Catppuccin themes built in
-  # and can follow the macOS system appearance: `light:…,dark:…` swaps to
-  # Catppuccin Latte in Light mode and Mocha in Dark mode automatically. The
-  # starship powerline prompt is background-independent (each segment paints its
-  # own bg/fg), so it stays readable under either theme.
+  # .nixmac/homebrew/data.json). We only own its config here so the font +
+  # appearance are declarative. No `theme` is set, so Ghostty uses its default
+  # colors; the aesthetics block below defines a translucent, blurred black
+  # background. The starship powerline prompt is background-independent (each
+  # segment paints its own bg/fg), so it stays readable regardless.
   home.file.".config/ghostty/config".text = ''
-    theme = catppuccin-macchiato
-
     font-family = JetBrainsMono Nerd Font
-    font-size = 14
-    font-thicken = true
 
-    # Comfortable reading: a bit of line spacing and inner padding.
-    adjust-cell-height = 12%
+    # aesthetics
+    background-opacity = 0.85
+    background-blur = 16
+    background = #000000
+    macos-titlebar-style = hidden
+
+    # typography
+    font-size = 16
+    font-thicken = true
+    font-thicken-strength = 1
+    adjust-cell-height = 1
+
+    # Comfortable reading: inner padding.
     window-padding-x = 12
     window-padding-y = 12
     window-padding-balance = true
