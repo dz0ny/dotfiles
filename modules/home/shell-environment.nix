@@ -501,7 +501,7 @@
   # starship powerline prompt is background-independent (each segment paints its
   # own bg/fg), so it stays readable under either theme.
   home.file.".config/ghostty/config".text = ''
-    theme = light:catppuccin-latte,dark:catppuccin-mocha
+    theme = catppuccin-macchiato
 
     font-family = JetBrainsMono Nerd Font
     font-size = 14
@@ -518,6 +518,7 @@
     mouse-hide-while-typing = true
 
     macos-option-as-alt = true
+    clipboard-read = allow
     copy-on-select = clipboard
     confirm-close-surface = false
   '';
