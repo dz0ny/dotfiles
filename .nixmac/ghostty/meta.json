@@ -1,0 +1,6 @@
+{
+  "name": "Ghostty",
+  "author": "dz0ny",
+  "description": "Manages the Ghostty terminal config (~/.config/ghostty/config) declaratively via Home Manager. Ghostty.app itself is installed as a Homebrew cask.",
+  "tags": ["terminal", "home-manager", "ghostty"]
+}
