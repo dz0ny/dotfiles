@@ -506,7 +506,6 @@
     background-opacity = 0.85
     background-blur = 16
     background = #000000
-    macos-titlebar-style = hidden
 
     # typography
     font-size = 16
