@@ -507,6 +507,11 @@
     background-blur = 16
     background = #000000
 
+    # Full macOS window chrome: real titlebar with traffic lights, so the window
+    # can be dragged, minimized and zoomed like any other app.
+    window-decoration = auto
+    macos-titlebar-style = native
+
     # typography
     font-size = 16
     font-thicken = true
@@ -526,5 +531,10 @@
     clipboard-read = allow
     copy-on-select = clipboard
     confirm-close-surface = false
+
+    # keybinds: match browser tab navigation. Ghostty binds cmd+opt+arrows to
+    # split focus by default; splits stay reachable via cmd+[ / cmd+].
+    keybind = super+alt+left=previous_tab
+    keybind = super+alt+right=next_tab
   '';
 }
