@@ -1,112 +1,188 @@
 ## Overview
-This is a nix-darwin + Home Manager flake managing a single Apple Silicon Mac mini named `Janezs-Mac-mini`, whose primary user is `dz0ny`. It's clearly tailored to a developer who lives in the terminal — the bulk of the effort goes into a polished zsh/Ghostty/git setup with a matching Catppuccin Mocha theme — while the macOS side is locked down and heavily customized for a specific personal workflow (Croatian keyboard, no Spotlight, no Time Machine).
+This is a nix-darwin flake managing an Apple Silicon Mac mini (`Janezs-Mac-mini`) for a single user, `dz0ny`, with Home Manager wired in for the user-level dotfiles. It's tailored for a developer who lives in the terminal — Ghostty, zsh, git with SSH signing, devenv — and who cares about a locked-down, Pareto Security-shaped macOS posture.
 
-- Nix itself is managed by **Determinate** (Determinate Nix), so `nix.enable = false` — nix-darwin does *not* manage the Nix daemon here.
-- Build/apply with `darwin-rebuild switch --flake .#Janezs-Mac-mini`; format Nix files with `nix fmt` (`nixfmt-rfc-style`).
-- Configuration is split into `modules/darwin/*.nix` (system) and `modules/home/dz0ny.nix` (user), plus a `.nixmac/` tree whose `data.json` files hold the editable data (Homebrew, SSH FDA check).
+Nix itself is managed by Determinate (`nix.enable = false`), so nix-darwin only handles the configuration, not the Nix installation. Rebuild with `darwin-rebuild switch --flake .#Janezs-Mac-mini`; format the Nix files with `nix fmt` (nixfmt-rfc-style).
+
+## My Team
+Nothing configured here yet.
 
 ## Packages
-Very little is installed at the system level; almost all day-to-day tooling comes through Home Manager for the `dz0ny` user, and GUI apps come through Homebrew.
+Packages arrive from three places — the system profile, Home Manager, and Homebrew — with a deliberate split between them.
 
-- **System profile** (`modules/darwin/packages.nix` + flake): `vim` and `nixfmt-rfc-style`.
-- **User CLI tools** (`modules/home/dz0ny.nix`): `ripgrep` (`rg`), `fd`, `jq`, `yq-go` (`yq`), `htop`, and `devenv` for per-project dev shells (`devenv shell` / `devenv up`).
-- **Program modules** that install a binary *and* wire up config: `fzf`, `bat`, `eza`, `zoxide`, `lazygit`, `starship`, `git` (with `delta` and `git-lfs`).
+### System profile (`modules/darwin/packages.nix`)
+
+- `nixfmt-rfc-style` — the Nix formatter, also wired up as `nix fmt`
+- `gh` — GitHub CLI
+- `vim` — declared in `flake.nix` alongside the host settings
+- `caddy` — pulled in by the dev-proxy module
+
+### User profile (`modules/home/shell-environment.nix`)
+
+The daily CLI toolkit lives here: `ripgrep`, `fd`, `jq`, `yq-go`, `htop`, and `devenv` as plain packages, plus program modules for `fzf`, `bat`, `eza`, `zoxide`, `lazygit`, `git` (with `delta` and `git-lfs`), `starship`, and `ssh`. Home Manager is the single source of truth for these — `ripgrep` and `git` were deliberately removed from Homebrew to avoid duplication.
 
 ### Homebrew
 
-Homebrew is enabled and managed by nix-darwin, but with `onActivation.cleanup = "none"` — meaning nix-darwin only *ensures* the declared packages are installed and never uninstalls anything you added manually with `brew`.
+Homebrew is enabled and driven by `.nixmac/homebrew/data.json` (taps, brews, casks). Two things worth knowing:
 
-- The actual tap/brew/cask list lives in `.nixmac/homebrew/data.json` (read by `.nixmac/homebrew/default.nix`), which is not shown here.
-- Some tools are deliberately kept on Homebrew rather than Nix: `gh` (the git credential helper references `/opt/homebrew/bin/gh` by absolute path) and `mise` (activated in the zsh startup). Ghostty.app is a Homebrew cask; only its config is managed by Nix.
-- The services audit notes casks such as `setapp`, `zoom`, `privileges`, `orbstack`, `proton-drive`, and `tailscale` are expected to reinstall themselves and their launchd items on a fresh Mac.
+- `onActivation.cleanup = "none"` — anything you install by hand with `brew` is left alone; nix-darwin only *ensures* the declared packages exist.
+- `autoUpdate` and `upgrade` are both on, so every `darwin-rebuild switch` refreshes formulae and upgrades outdated casks. Expect switches to take a while.
+
+`gh` stays on Homebrew as well because the git credential helper references `/opt/homebrew/bin/gh` by absolute path. `mise` is also a Homebrew install, activated from the zsh startup file.
 
 ## Fonts
-One programming font is installed system-wide so the terminal renders icons correctly.
+One font is installed system-wide, and it's the one the terminal depends on.
 
-- `nerd-fonts.jetbrains-mono` — the JetBrainsMono Nerd Font, referenced by name in the Ghostty config (`font-family = JetBrainsMono Nerd Font`) and required for the glyphs used by `starship`, `eza` icons, and `lazygit`.
-- Note the nixpkgs-unstable namespace: Nerd Fonts live under `nerd-fonts.*` now, not the old `nerdfonts.override` form.
+`nerd-fonts.jetbrains-mono` is installed via `fonts.packages`. Ghostty is configured to use `JetBrainsMono Nerd Font`, and the Nerd Font glyphs are what make the starship powerline prompt, `eza --icons`, and lazygit render correctly — swap the font out and those all break visually. Note that on nixpkgs-unstable Nerd Fonts are namespaced under `nerd-fonts.*`; the old `nerdfonts.override` form is gone.
 
 ## macOS Settings
-A large, opinionated set of `system.defaults` in `modules/darwin/system-defaults.nix` reproduces this specific machine's preferences — only keys that differ from macOS factory defaults are recorded, so a rebuilt Mac comes up configured the same way.
+`modules/darwin/macos-settings.nix` reproduces every preference that differs from macOS factory defaults, so a replacement Mac comes up configured on the first switch.
 
-### Input & keyboard
+### Input and keyboard
 
-- Natural scrolling **off**; trackpad Force Click on with the lightest click thresholds; three-finger tap enabled.
-- Very fast key repeat (`InitialKeyRepeat = 10`, `KeyRepeat = 1`) and press-and-hold accents disabled, so holding a key repeats it.
-- Full keyboard access (`AppleKeyboardUIMode = 3`), ISO tilde key remapped (`system.keyboard.nonUS.remapTilde`).
-- Input sources are **Croatian-PC** (primary) plus Slovenian, with the character palette and press-and-hold helpers — a re-login may be needed for a fresh Mac to reflect the active layout.
-- Text replacements: `◊ → @` and `omw → On my way!`.
+- Natural scrolling **off**; Force Click on, with both click thresholds at the lightest setting; Magic Mouse in one-button mode
+- Fast keyboard: `InitialKeyRepeat = 10`, `KeyRepeat = 1`, press-and-hold accent popover disabled so holding a key repeats it
+- Fast pointer: `com.apple.mouse.scaling = 3.0`, `com.apple.scrollwheel.scaling = 1.7`
+- Full keyboard access (`AppleKeyboardUIMode = 3`) so Tab reaches every control
+- Input sources are Croatian-PC (selected) plus the character palette and press-and-hold helpers; **a newly built Mac may need a re-login before the layout takes effect**
+- The non-US tilde key is remapped via `system.keyboard.nonUS.remapTilde`
+- Text replacements: `◊` → `@` and `omw` → `On my way!`
 
-### Dock, Finder & windows
+### Finder and Dock
 
-- Dock is **not** auto-hidden, sits on the **left** edge, tile size 78, no recent apps, minimize-into-app, and the bottom-right hot corner (Quick Note) is disabled.
-- Pinned Dock apps, left→right: Arc, Mail, ChatGPT, Slack, Zed, Claude, Ghostty, Tailscale. Anything not in this list is cleared from the Dock on rebuild.
-- Finder: list view, show all extensions and hidden dotfiles, path bar shown, full POSIX path in the title, new windows open in Home, folders sorted first, no disk icons on the desktop, and search defaults to the current folder.
-- Window animations are effectively off (instant open/close/resize) and Stage Manager-style window grouping/auto-hide is tuned in `WindowManager`.
+- Finder: list view, path bar shown, folders first, new windows open in Home, hidden files shown, full POSIX path in the title, search scoped to the current folder, no disks on the desktop, extension-change warning off
+- Dock: always visible on the **left** edge, 78px tiles, no recents, minimize into app icon, bottom-right hot corner disabled (no accidental Quick Note)
+- Pinned Dock apps, in order: Arc, Mail, ChatGPT, Slack, Zed, Claude, Ghostty, Tailscale. **Anything not in that list is cleared from the Dock on every rebuild.**
+- Stage Manager/window settings: window grouping on, auto-hide on, desktop hidden, tiled window margins off
 
-### Other
+### Speed and appearance
 
-- Menu-bar clock shows day-of-week, date, and AM/PM.
-- Screenshots have no window shadow, highlight clicks, and capture HDR; `.DS_Store` files are kept off network and USB volumes.
-- Screensaver requires the password 10s after it starts.
-- Magic Mouse is single-button.
+Window and Finder animations are disabled (`NSAutomaticWindowAnimationsEnabled = false`, `NSWindowResizeTime = 0.001`, `DisableAllAnimations`), scrollbars are always shown, and save/print panels open expanded. Screenshots drop the window shadow, highlight clicks, and capture HDR. `.DS_Store` files are kept off network shares and USB volumes.
+
+### Security posture
+
+- Screensaver/sleep requires the password **immediately** (`askForPasswordDelay = 0`)
+- Gatekeeper quarantine (`LSQuarantine`) stays on
+- AirDrop discovery limited to Contacts Only
+- Automatic macOS updates install themselves; `com.apple.SoftwareUpdate` check/download/config-data/critical-update keys and `com.apple.commerce.AutoUpdate` are all enabled via `CustomSystemPreferences`
+- `power.sleep.computer = "never"` — the machine never idle-sleeps (displays and disks still spin down)
 
 ## Services
-There are almost no declared services — this module actively disables two macOS background facilities on every rebuild and runs a weekly Nix garbage collection.
+Two custom LaunchDaemons run as root, plus two activation-time scripts that turn off macOS background facilities.
 
-- On each activation, `system.activationScripts.disable-spotlight-and-time-machine` runs `mdutil -a -i off` / `mdutil -a -d` to fully disable Spotlight indexing, then `tmutil stopbackup` and `tmutil disable` to turn off Time Machine. The commands are idempotent. (Spotlight result categories are also all hidden in the defaults.)
-- No high-level nix-darwin services (`tailscale`, `yabai`, etc.) are enabled, and no launchd daemons exist.
-- Per the captured audit (2026-07-11), every non-Apple launchd item — Setapp, Google Keystone, Zoom, Privileges, OrbStack, Proton Drive, Tailscale, Determinate Nix — is installed and managed by its own app/cask, so nothing needs to be declared here. Re-run `scripts/capture-state.sh` to refresh that audit.
+### Dev proxy (`modules/darwin/dev-proxy.nix`)
+
+A Caddy reverse proxy runs as a root LaunchDaemon (`org.nix-darwin.dev-proxy`) so it can bind port 80, mapping friendly names to local dev servers:
+
+- `http://app.localhost` → `127.0.0.1:3000`
+- `http://api.localhost` → `127.0.0.1:8080`
+
+macOS resolves `*.localhost` to 127.0.0.1 on its own, so there's no `/etc/hosts` or dnsmasq involved — add a name/port pair to the `routes` attrset and rebuild. **These are plain `http://` on purpose**: automatic HTTPS would mint certs from Caddy's internal CA and try to install it into the login keychain, which requires an interactive prompt. Caddy state lives in `/var/lib/dev-proxy`, and logs go to `/tmp/dev-proxy.out.log` and `/tmp/dev-proxy.err.log`.
+
+### Weekly garbage collection
+
+Because Determinate Nix means `nix.gc` is unavailable, a LaunchDaemon (`org.nix-darwin.nix-gc`) runs `nix-collect-garbage --delete-older-than 30d` every Sunday at 03:00. `StartCalendarInterval` fires missed runs after the Mac next wakes, so a sleeping machine still gets collected. Logs: `/tmp/nix-gc.out.log`, `/tmp/nix-gc.err.log`.
+
+### Spotlight and Time Machine
+
+Every activation runs `mdutil -a -i off`, `mdutil -a -d`, `tmutil stopbackup`, and `tmutil disable`. Spotlight indexing and all Spotlight activity are off system-wide, matching the `com.apple.Spotlight` preference that hides every result category. Time Machine automatic backups are disabled. Both are idempotent, so they re-assert on every switch.
+
+### Not managed here
+
+An audit of the live machine (captured 2026-07-11) found no hand-authored launchd jobs. Setapp, Google Keystone, Zoom, Privileges, OrbStack, Proton Drive, Tailscale, and Determinate Nix all install and manage their own plists, and login items (Pareto Security, Stats, Raycast, Android File Transfer) register themselves via SMAppService — they reappear once the corresponding Homebrew casks are installed.
 
 ## Shell & Environment
-The interactive shell is a fully-featured zsh managed by Home Manager, themed to match Ghostty, and this is where most of the daily UX lives.
-
-### zsh
-
-- Autosuggestions, syntax highlighting, and completion are on; history holds 50 000 shared, de-duplicated entries.
-- The startup (`initContent`) bootstraps **bun** (adds `~/.bun/bin` to `PATH`) and activates **mise** from `~/.local/bin/mise`. `mise` is installed via Homebrew, and its global toolchain is pinned in `~/.config/mise/config.toml` to `flutter = "latest"` (run `mise install` on a fresh Mac).
-- `environment.variables` (`modules/darwin/environment.nix`) is empty — no system-wide env vars are set.
-
-### Aliases & tools
-
-- `lg` → `lazygit`; `ls`/`ll`/`la`/`lt` come from **eza** (with git status and auto icons).
-- **fzf** keybindings: `Ctrl-R` history, `Ctrl-T` files, `Alt-C` cd — all backed by `fd` so hidden files are found and `.gitignore` respected.
-- **zoxide** provides `z` / `zi` for smart directory jumping; **bat** replaces `cat` with Catppuccin-mocha highlighting.
-- **starship** renders a two-line Catppuccin Mocha prompt. Note it's built from a custom override that drops desktop notifications (the `notify` feature breaks the Darwin linker), keeping only the `battery` feature.
+The interactive terminal is fully declarative: Ghostty as the emulator, zsh as the shell, starship as the prompt, and a matched Catppuccin Mocha theme across the tools.
 
 ### Ghostty
 
-- The terminal itself is a Homebrew cask; only `~/.config/ghostty/config` is managed here: `catppuccin-mocha` theme, JetBrainsMono Nerd Font at size 14, block cursor, `copy-on-select`, `macos-option-as-alt`, and generous padding/line spacing.
+`~/.config/ghostty/config` is managed here (the app itself is a Homebrew cask). Key points:
+
+- JetBrainsMono Nerd Font at 16pt, thickened, with 12px padding and a block non-blinking cursor
+- Translucent black background (`background-opacity = 0.85`, `background-blur = 16`), native macOS titlebar
+- `copy-on-select = clipboard`, `confirm-close-surface = false`, `macos-option-as-alt = true`
+- `⌘⌥←` / `⌘⌥→` are rebound to previous/next tab (browser-style); splits remain on `⌘[` / `⌘]`
+
+### zsh and keybindings
+
+Autosuggestions, syntax highlighting, and completion are on, with 50k shared history that ignores dups and space-prefixed commands. The one gotcha worth memorizing:
+
+- **`⌥R` opens fzf history**, not `Ctrl-R`. Ctrl-R is unreliable across terminals and multiplexers, so it was handed back to zsh's native incremental reverse-search.
+- `Ctrl-T` is fzf file search and `⌥C` is fzf cd, both walking with `fd` so hidden files are included and `.gitignore` is respected.
+
+`ls`/`ll`/`la`/`lt` come from eza (with git status and icons), `z`/`zi` from zoxide, `lg` is aliased to lazygit, and `bat` replaces `cat` with highlighting. Bun (`~/.bun/bin`) and mise (`~/.local/bin/mise activate zsh`) are bootstrapped at shell startup.
+
+### Prompt
+
+Starship renders a two-line Catppuccin Mocha powerline: OS icon, directory, git branch/status, nix shell, and command duration (shown past 2s), then the `❯` caret. Note that starship is built with `--no-default-features` plus only `battery` — the default `notify` feature pulls in `mac-notification-sys`, whose link step crashes the cctools linker on this toolchain and breaks the whole system build.
+
+### git
+
+Configured as `Janez T <hey@dz0ny.dev>` with delta as the pager (`n`/`N` to navigate hunks) and git-lfs enabled. Behavior worth knowing: `pull.rebase`, `push.autoSetupRemote`, `push.followTags`, `fetch.prune`/`pruneTags`/`all`, `rebase.autoStash`/`autoSquash`/`updateRefs`, histogram diffs, `rerere` on, and `help.autocorrect = "prompt"`. Aliases: `pp` (`push --force-with-lease`), `up` (`pull origin main`), `co` (`checkout main`).
+
+### SSH
+
+`~/.ssh/config` is Home Manager-owned and uses tag-based identity routing. Host aliases `rpi`, `gh`, and `github.com` carry `Tag personal`; `air` (air.radioterminal.si) carries `Tag work`; both currently resolve to `~/.ssh/id_ed25519` via `Match tagged` blocks. `linux-builder` is self-contained on port 31022 with its own `/etc/nix/builder_ed25519` key.
+
+- Global defaults: `AddKeysToAgent yes`, `UseKeychain`, `ForwardAgent no`, hashed known_hosts, `StrictHostKeyChecking ask`, and a modern post-quantum-forward cipher/KEX set
+- Connection multiplexing via `~/.ssh/sockets/%C` with a 10m persist; the socket directory is created by a Home Manager activation step
+- OrbStack (`~/.orbstack/ssh/config`) and Colima (`~/.colima/ssh_config`) are pulled in with an `Include` at the very top of the file, which is where OrbStack requires it
+
+### mise
+
+`~/.config/mise/config.toml` pins `flutter = "latest"` globally (which pulls in a matching JDK). On a fresh Mac, run `mise install` to materialize it.
+
+### System environment variables
+
+`environment.variables` is currently empty — nothing is exported system-wide.
+
+## AI Agents
+Two agent setups coexist: Claude Code as the primary harness, and a fully local Ollama + Aider pair for offline work.
+
+### Claude Code
+
+`programs.claude-code` manages the configuration. Both the default Haiku and Sonnet model slots point at `claude-sonnet-4-6[1m]`, permissions default to `auto`, effort level is `medium`, and the TUI runs fullscreen. A `PreToolUse` hook on `Bash` invokes `rtk hook claude`, and `@RTK.md` is injected as context.
+
+A `Stop` hook plays a random Warcraft peon voice line whenever Claude finishes and is waiting for input: it runs `afplay` against a randomly picked `.ogg` from a `peonSounds` derivation. Those sounds are fetched at build time with `fetchFromGitHub` from `zupo/dotfiles` (pinned to rev `63c622b`) and installed into the Nix store, so the hook never touches the network at runtime.
+
+Enabled plugins include `frontend-design`, `context7`, `feature-dev`, `commit-commands`, `code-simplifier`, `cloudflare`, the `gopls`/`swift`/`clangd` LSP plugins, `devenv@devenv-claude`, and `hakuto` from the `teamniteo/hakuto` GitHub marketplace. Claude Code is the one unfree package on this system — `nix-overlays.nix` scopes `allowUnfreePredicate` to exactly `claude-code` rather than flipping `allowUnfree` globally.
+
+### MCP servers
+
+`programs.mcp` defines a shared baseline that Claude Code consumes via `enableMcpIntegration`:
+
+- `context7` — current library and framework docs (`https://mcp.context7.com/mcp`)
+- `cloudflare-docs` — Cloudflare platform docs (`https://docs.mcp.cloudflare.com/mcp`)
+- `nixos` — nixpkgs/nix-darwin/Home Manager option lookup, run via `nix run github:utensils/mcp-nixos`
+
+### Local models
+
+`services.ollama` runs bound to `127.0.0.1:11434` — localhost only, nothing exposed. A user LaunchAgent (`dev.dz0ny.ollama-models`) waits up to 60 seconds for the service at login, then pulls `qwen2.5-coder:7b`; pulls are idempotent so this is safe to re-run. `aider-chat` is installed as the edit-capable harness on top.
 
 ## Security & Secrets
-Security here is a mix of enabled macOS hardening, a hardened SSH client, and a sops-nix scaffold that currently holds no actual secrets.
+Authentication is biometric where possible, secrets go through sops-nix with an age key, and the firewall stays on.
 
-### System hardening
+### Authentication
 
-- **Touch ID for sudo** is enabled (`security.pam.services.sudo_local.touchIdAuth`), so `sudo` and `darwin-rebuild` accept a fingerprint.
-- The **application firewall** is on with **stealth mode** (`modules/darwin/networking.nix`).
-- Downloaded-app **quarantine** is kept on (`LSQuarantine = true`).
+Both `security.pam.services.sudo_local.touchIdAuth` and `watchIdAuth` are enabled, so `sudo` (including `darwin-rebuild`) accepts Touch ID or an Apple Watch tap. Apple Watch authorization additionally requires "Use your Apple Watch to unlock apps and your Mac" to be on in System Settings.
 
-### SSH client
+### Firewall
 
-Home Manager owns `~/.ssh/config` (the previous file is backed up as `*.hm-backup` on first activation). It defines:
+The macOS application firewall is enabled with stealth mode on, so the Mac doesn't answer unsolicited probes. `blockAllIncoming` is deliberately **off** — blocking everything would break LocalSend, Tailscale, and other local services.
 
-- Modern, post-quantum-forward crypto defaults (sntrup761x25519, chacha20-poly1305, etc.), agent keys added on first use and passphrases loaded from the **macOS Keychain**, hashed known-hosts, and connection multiplexing over `~/.ssh/sockets` (created automatically by an activation hook).
-- Host aliases tagged `personal` (`rpi`, `gh`, `github.com`) or `work` (`air`), with `Match tagged` blocks selecting the identity — both realms currently use `~/.ssh/id_ed25519` (a dedicated work key is a noted TODO).
-- A self-contained `linux-builder` host on `localhost:31022` using `/etc/nix/builder_ed25519`.
-- `Include`s for OrbStack (`~/.orbstack/ssh/config`) and Colima (`~/.colima/ssh_config`).
+### Secrets
 
-### Git commit signing
+sops-nix is wired in with YAML as the default format. The age key is discovered in order:
 
-- Commits are signed with **SSH signatures** using `~/.ssh/id_ed25519.pub`, but `signByDefault = false` (tags are not signed).
-- `~/.config/git/allowed_signers` is written declaratively so `git log --show-signature` can verify your own commits locally.
-- GitHub auth uses `gh` as the credential helper via its absolute Homebrew path.
+1. `$SOPS_AGE_KEY_FILE`, if set and the file exists
+2. `~/Library/Application Support/sops/age/keys.txt`
+3. `~/.config/sops/age/keys.txt`
 
-### sops-nix
-
-- The sops-nix scaffold is wired in and looks for an age key at `$SOPS_AGE_KEY_FILE`, then `~/Library/Application Support/sops/age/keys.txt`, then `~/.config/sops/age/keys.txt` — falling back to `null` if none exist.
-- **No secrets are actually declared** — `sops.secrets` in `sops-secrets.nix` is empty, so this is ready-to-use plumbing rather than an active secret store.
+If none exist, `sops.age.keyFile` is `null`. `modules/darwin/sops-secrets.nix` is where secret declarations and their runtime bindings go — it currently holds only commented examples showing the expected shape (`sopsFile`, `path` under `/run/secrets/`, owner `dz0ny`, group `staff`, mode `0400`). The convention is to export secret *file paths* through `environment.variables`, never values.
 
 ### SSH Full Disk Access check
 
-- The `.nixmac/ssh-fda` module adds a pre-activation check: if you run `darwin-rebuild` over SSH without Full Disk Access, it warns that app updates may fail (enable it under **System Settings → General → Sharing → Remote Login**, or rebuild from a local terminal). It's a warning by default; a `strict` flag (in `.nixmac/ssh-fda/data.json`) would make it abort instead.
+The `.nixmac/ssh-fda` module adds a pre-activation check: if you run `darwin-rebuild` over SSH without Full Disk Access, it warns that app updates may fail and points you at System Settings → General → Sharing → Remote Login → "Allow full disk access for remote users." It's a warning by default, not fatal — `strict` mode (which aborts) is off unless enabled in that module's `data.json`.
+
+### Commit signing
+
+Git is set up for SSH commit signing with `~/.ssh/id_ed25519.pub`, but `signByDefault = false` and `tag.gpgSign = false`, so signing is opt-in per commit. `~/.config/git/allowed_signers` is generated with the personal ed25519 public key so `git log --show-signature` can verify locally-signed commits.

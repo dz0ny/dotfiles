@@ -2,6 +2,22 @@
 
 let
   ollama = "${pkgs.ollama}/bin/ollama";
+
+  # Warcraft peon voice lines, vendored at build time so the Stop hook never
+  # reaches the network.
+  peonSounds = pkgs.stdenvNoCC.mkDerivation {
+    name = "peon-sounds";
+    src = pkgs.fetchFromGitHub {
+      owner = "zupo";
+      repo = "dotfiles";
+      rev = "63c622b95e943f912a299cbb3ce535779d6f42a3";
+      hash = "sha256-aiFhPJEZ3KfobrKkQ2PDF5M3ehNpFlcIIAAPKWA4ets=";
+    };
+    installPhase = ''
+      mkdir -p $out
+      cp sounds/*.ogg $out/
+    '';
+  };
 in
 {
   # Local coding model runtime for the Ollama + Aider agent. Aider supplies the
@@ -87,6 +103,18 @@ in
             {
               type = "command";
               command = "rtk hook claude";
+            }
+          ];
+        }
+      ];
+
+      # Play a random Warcraft peon sound when Claude is waiting for input.
+      hooks.Stop = [
+        {
+          hooks = [
+            {
+              type = "command";
+              command = "afplay $(ls ${peonSounds}/*.ogg | sort -R | head -1) &";
             }
           ];
         }
