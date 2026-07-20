@@ -19,6 +19,9 @@
     applicationFirewall = {
       enable = true;
       enableStealthMode = true;
+      # Leave incoming connections to signed/allowed apps working; do not block
+      # everything, which would break local services (LocalSend, Tailscale, etc.).
+      blockAllIncoming = false;
     };
 
     # Override the host name for the machine if needed:

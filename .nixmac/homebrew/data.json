@@ -1,12 +1,14 @@
 {
   "brews": [
     "gh",
-    "heroku",
-    "stripe/stripe-cli/stripe"
+    "heroku"
   ],
   "casks": [
     "brave-browser",
+    "google-chrome",
     "localsend",
+    "pareto-security",
+    "privileges",
     "proton-pass",
     "raycast",
     "rectangle",
@@ -18,7 +20,6 @@
     "zed"
   ],
   "taps": [
-    "heroku/brew",
-    "stripe/stripe-cli"
+    "heroku/brew"
   ]
 }

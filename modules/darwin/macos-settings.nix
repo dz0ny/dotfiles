@@ -104,9 +104,18 @@
     disable-shadow = true;
   };
   system.defaults.screensaver = {
-    # Require the password 10s after sleep/screensaver starts.
-    askForPasswordDelay = 10;
+    # Require the password immediately when sleep/screensaver starts (Pareto
+    # Security "Password after lock" posture).
+    askForPassword = true;
+    askForPasswordDelay = 0;
   };
+
+  # ---------------------------------------------------------------------------
+  # Software update posture (Pareto Security). Install macOS updates
+  # automatically; the remaining SoftwareUpdate/commerce keys below have no
+  # typed nix-darwin option and are written via CustomSystemPreferences.
+  # ---------------------------------------------------------------------------
+  system.defaults.SoftwareUpdate.AutomaticallyInstallMacOSUpdates = true;
 
   # Keep the machine awake: never let the computer sleep on idle (mirrors
   # `pmset -a sleep 0`). Displays and disks may still spin down on their own.
@@ -117,10 +126,29 @@
   system.keyboard.nonUS.remapTilde = true;
 
   # ---------------------------------------------------------------------------
+  # System-scoped preferences (root domains under /Library/Preferences) without
+  # a typed nix-darwin option. Apple security-data, critical, and App Store
+  # updates (Pareto Security software-update posture).
+  # ---------------------------------------------------------------------------
+  system.defaults.CustomSystemPreferences = {
+    "com.apple.SoftwareUpdate" = {
+      AutomaticCheckEnabled = true;
+      AutomaticDownload = true;
+      ConfigDataInstall = true;
+      CriticalUpdateInstall = true;
+    };
+    "com.apple.commerce".AutoUpdate = true;
+  };
+
+  # ---------------------------------------------------------------------------
   # Settings without a typed nix-darwin option, written verbatim to their
   # domains. These still differ from the macOS factory defaults.
   # ---------------------------------------------------------------------------
   system.defaults.CustomUserPreferences = {
+    # Limit AirDrop discovery to Contacts Only (Pareto Security accepts this or
+    # "Off") to reduce nearby-device exposure.
+    "com.apple.sharingd".DiscoverableMode = "Contacts Only";
+
     NSGlobalDomain = {
       # Double-clicking a window title bar does nothing (default is zoom/minimize).
       AppleMiniaturizeOnDoubleClick = false;

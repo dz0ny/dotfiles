@@ -84,6 +84,12 @@
           # existing installs alone.)
           homebrew.onActivation.cleanup = "none";
 
+          # Keep Homebrew-managed apps current when this configuration activates
+          # (Pareto Security "update managed apps" posture): refresh formulae and
+          # upgrade outdated casks/brews on every `darwin-rebuild switch`.
+          homebrew.onActivation.autoUpdate = true;
+          homebrew.onActivation.upgrade = true;
+
           # Enable if you want to allow unfree packages (e.g. some fonts, or certain applications). Leave false to avoid them entirely.
           # nixpkgs.config.allowUnfree = true;
         };
