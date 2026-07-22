@@ -187,6 +187,13 @@
       captureHDR = true;
     };
 
+    # Stats menu-bar monitor: enable only the Network module and show its
+    # upload/download transfer speeds in the menu bar (the "speed" widget).
+    "eu.exelban.Stats" = {
+      Network_state = true;
+      Network_widget = "speed";
+    };
+
     # Hide every Spotlight search-result category. Indexing and Spotlight
     # activity are disabled system-wide in services.nix as well.
     "com.apple.Spotlight" = {

@@ -536,5 +536,8 @@
     # split focus by default; splits stay reachable via cmd+[ / cmd+].
     keybind = super+alt+left=previous_tab
     keybind = super+alt+right=next_tab
+
+    # cmd+shift+d splits the current surface to the right.
+    keybind = super+shift+d=new_split:right
   '';
 }
