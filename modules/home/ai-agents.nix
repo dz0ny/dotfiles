@@ -22,7 +22,11 @@ in
 {
   # Local coding model runtime for the Ollama + Aider agent. Aider supplies the
   # edit-capable harness; Ollama serves the model, bound to localhost only.
-  home.packages = [ pkgs.aider-chat ];
+  # rtk is the token-killing CLI proxy wired into the Claude Code Bash hook below.
+  home.packages = [
+    pkgs.aider-chat
+    pkgs.rtk
+  ];
 
   services.ollama = {
     enable = true;
@@ -96,13 +100,16 @@ in
 
       permissions.defaultMode = "auto";
 
+      # Rewrite every Bash tool call through rtk before it runs, filtering and
+      # compressing command output. Referenced by store path so the hook fires
+      # even when the menu-bar app's minimal PATH lacks the HM profile.
       hooks.PreToolUse = [
         {
           matcher = "Bash";
           hooks = [
             {
               type = "command";
-              command = "rtk hook claude";
+              command = "${pkgs.rtk}/bin/rtk hook claude";
             }
           ];
         }
