@@ -57,6 +57,13 @@
     # injected automatically by its program module below, so it is intentionally
     # not repeated here.
     initContent = ''
+      # Homebrew bin on PATH so Homebrew-only CLIs (e.g. heroku from the
+      # heroku/brew tap, see .nixmac/homebrew/data.json) are reachable. Appended,
+      # not prepended, so nix-managed tools keep priority over any Homebrew ones.
+      if [ -d /opt/homebrew/bin ]; then
+        export PATH="$PATH:/opt/homebrew/bin"
+      fi
+
       # bun
       export BUN_INSTALL="$HOME/.bun"
       export PATH="$BUN_INSTALL/bin:$PATH"
