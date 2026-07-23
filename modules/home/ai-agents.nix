@@ -121,7 +121,7 @@ in
           hooks = [
             {
               type = "command";
-              command = "afplay $(ls ${peonSounds}/*.ogg | sort -R | head -1) &";
+              command = ''osascript -l JavaScript -e 'ObjC.import("AppKit"); var s = $.NSSound.alloc.initWithContentsOfFileByReference("'"$(ls ${peonSounds}/*.ogg | sort -R | head -1)"'", false); s.play(); while (s.isPlaying) { $.NSThread.sleepForTimeInterval(0.2); }' &'';
             }
           ];
         }
