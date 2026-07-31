@@ -19,7 +19,7 @@
   # $ darwin-rebuild switch --flake .#Scotts-MacBook-Pro-2
 
   environment.systemPackages = with pkgs; [
-    nixfmt-rfc-style # official RFC 166 Nix code formatter (also wired up as `nix fmt`)
+    nixfmt # official RFC 166 Nix code formatter (also wired up as `nix fmt`)
     gh # GitHub CLI
   ];
 

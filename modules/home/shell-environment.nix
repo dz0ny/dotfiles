@@ -28,7 +28,10 @@
     jq # JSON processor
     yq-go # YAML/XML/TOML processor (yq)
     htop # interactive process viewer
-    devenv # per-project developer environments (devenv shell / devenv up)
+    devenv # per-project developer environments (devenv shell / devenv up).
+    # Overlaid in nix-overlays.nix to the upstream release pinned in flake.nix,
+    # because nixpkgs-unstable lags devenv's own releases.
+
   ];
 
   # ---------------------------------------------------------------------------
@@ -206,8 +209,8 @@
     # Use fd for the file/dir walkers so hidden files are found and .gitignore
     # is respected.
     defaultCommand = "fd --type f --hidden --follow --exclude .git";
-    fileWidgetCommand = "fd --type f --hidden --follow --exclude .git";
-    changeDirWidgetCommand = "fd --type d --hidden --follow --exclude .git";
+    fileWidget.command = "fd --type f --hidden --follow --exclude .git";
+    changeDirWidget.command = "fd --type d --hidden --follow --exclude .git";
   };
 
   # ---------------------------------------------------------------------------
@@ -253,39 +256,46 @@
   # key is the personal ed25519 public key; commits and tags are signed by
   # default. `gpg.ssh.allowedSignersFile` lets `git log --show-signature`
   # verify locally-signed commits.
+  # git-delta — syntax-highlighting pager for `git diff`/`show`/`log -p`.
+  # Lives in its own top-level module (it used to be `programs.git.delta`);
+  # enableGitIntegration wires it as core.pager + interactive.diffFilter (for
+  # `git add -p`) and must now be set explicitly.
+  programs.delta = {
+    enable = true;
+    enableGitIntegration = true;
+    options = {
+      navigate = true; # n/N to jump between diff hunks
+      line-numbers = true;
+      syntax-theme = "Catppuccin-mocha"; # matches bat / starship / Ghostty
+    };
+  };
+
   programs.git = {
     enable = true;
-    userName = "Janez T";
-    userEmail = "hey@dz0ny.dev";
-
-    # git-delta — syntax-highlighting pager for `git diff`/`show`/`log -p`.
-    # Enabling it installs the `delta` binary and wires it as core.pager +
-    # interactive.diffFilter (for `git add -p`).
-    delta = {
-      enable = true;
-      options = {
-        navigate = true; # n/N to jump between diff hunks
-        line-numbers = true;
-        syntax-theme = "Catppuccin-mocha"; # matches bat / starship / Ghostty
-      };
-    };
 
     # git-lfs — large file storage. Enabling installs the binary and adds the
     # required `filter.lfs` smudge/clean/process config.
     lfs.enable = true;
-
-    aliases = {
-      pp = "push --force-with-lease";
-      up = "pull origin main";
-      co = "checkout main";
-    };
 
     signing = {
       key = "~/.ssh/id_ed25519.pub";
       signByDefault = false;
     };
 
-    extraConfig = {
+    # Raw git config — `settings` subsumes the former `userName`/`userEmail`/
+    # `aliases`/`extraConfig` options.
+    settings = {
+      user = {
+        name = "Janez T";
+        email = "hey@dz0ny.dev";
+      };
+
+      alias = {
+        pp = "push --force-with-lease";
+        up = "pull origin main";
+        co = "checkout main";
+      };
+
       # --- SSH commit signing ---
       gpg.format = "ssh";
       gpg."ssh".allowedSignersFile = "~/.config/git/allowed_signers";

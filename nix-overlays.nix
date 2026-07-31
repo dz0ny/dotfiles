@@ -1,4 +1,9 @@
-{ lib, pkgs, ... }:
+{
+  lib,
+  pkgs,
+  inputs,
+  ...
+}:
 
 {
   # Nixpkgs overlays
@@ -19,7 +24,14 @@
   # })
 
   nixpkgs.overlays = [
-    # Add overlays here
+    # devenv from the upstream release flake (pinned in flake.nix) rather than
+    # the nixpkgs snapshot, which trails upstream by a release or two. Anything
+    # referring to `pkgs.devenv` — see modules/home/shell-environment.nix —
+    # gets the pinned version, including under Home Manager
+    # (`useGlobalPkgs = true` means it shares this pkgs instance).
+    (final: prev: {
+      devenv = inputs.devenv.packages.${prev.stdenv.hostPlatform.system}.devenv;
+    })
   ];
 
   # Allow the single unfree package we install declaratively — Claude Code

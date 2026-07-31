@@ -12,6 +12,21 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # devenv — pinned to the upstream release, not the nixpkgs snapshot.
+    # nixpkgs-unstable lags devenv by a release or two (it carried 2.1.2 while
+    # upstream had shipped 2.2), so take the package straight from cachix's
+    # flake. Deliberately NOT `inputs.nixpkgs.follows = "nixpkgs"`: devenv pins
+    # its own `devenv-nixpkgs/rolling` and building against a different nixpkgs
+    # misses every binary from https://devenv.cachix.org (already configured as
+    # a substituter in /etc/nix/nix.custom.conf) and rebuilds the Rust CLI plus
+    # a patched Nix from source.
+    #
+    # `latest` is the moving tag upstream's own install docs use
+    # (`nix profile install github:cachix/devenv/latest`); it always points at
+    # the newest release. The flake.lock still pins the resolved rev, so builds
+    # stay reproducible — run `nix flake update devenv` to pick up a new release.
+    devenv.url = "github:cachix/devenv/latest";
+
     # ============================================================================
     # home-manager (OPTIONAL - currently commented out)
     # ============================================================================
@@ -38,6 +53,7 @@
       nixpkgs,
       sops-nix,
       home-manager,
+      ...
     }:
     let
       configuration =
@@ -84,11 +100,14 @@
     in
     {
       # Nix code formatter (run with `nix fmt`).
-      formatter."aarch64-darwin" = nixpkgs.legacyPackages."aarch64-darwin".nixfmt-rfc-style;
+      formatter."aarch64-darwin" = nixpkgs.legacyPackages."aarch64-darwin".nixfmt;
 
       # Build darwin flake using:
       # $ darwin-rebuild build --flake .#Janezs-Mac-mini
       darwinConfigurations."Janezs-Mac-mini" = nix-darwin.lib.darwinSystem {
+        # Flake inputs reachable from every module as `inputs` (nix-overlays.nix
+        # uses it to pull devenv from its own flake instead of nixpkgs).
+        specialArgs = { inherit inputs; };
         modules = [
           configuration
           ./.nixmac
