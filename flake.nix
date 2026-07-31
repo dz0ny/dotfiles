@@ -74,21 +74,9 @@
           # Primary user (required by nix-darwin for homebrew, system.defaults, etc.)
           system.primaryUser = "dz0ny";
 
-          # Enable Homebrew management through nix-darwin
-          homebrew.enable = true;
-
-          # Never uninstall Homebrew packages that aren't declared here. We only
-          # want nix-darwin to *ensure* the packages in .nixmac/homebrew/data.json
-          # are installed — apps installed manually via `brew` stay untouched.
-          # ("uninstall"/"zap" would remove anything not listed; "none" leaves
-          # existing installs alone.)
-          homebrew.onActivation.cleanup = "none";
-
-          # Keep Homebrew-managed apps current when this configuration activates
-          # (Pareto Security "update managed apps" posture): refresh formulae and
-          # upgrade outdated casks/brews on every `darwin-rebuild switch`.
-          homebrew.onActivation.autoUpdate = true;
-          homebrew.onActivation.upgrade = true;
+          # Homebrew is no longer managed by nix-darwin. Anything already
+          # installed via `brew` stays installed and is managed manually.
+          homebrew.enable = false;
 
           # Enable if you want to allow unfree packages (e.g. some fonts, or certain applications). Leave false to avoid them entirely.
           # nixpkgs.config.allowUnfree = true;

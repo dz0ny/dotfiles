@@ -1,27 +1,5 @@
 {
-  "brews": [
-    "gh",
-    "heroku"
-  ],
-  "casks": [
-    "brave-browser",
-    "google-chrome",
-    "localsend",
-    "pareto-security",
-    "privileges",
-    "proton-pass",
-    "rectangle",
-    "rustdesk",
-    "signal",
-    "slack",
-    "softmaker-freeoffice",
-    "raycast",
-    "stats",
-    "tailscale-app",
-    "teamviewer",
-    "zed"
-  ],
-  "taps": [
-    "heroku/brew"
-  ]
+  "brews": [],
+  "casks": [],
+  "taps": []
 }
