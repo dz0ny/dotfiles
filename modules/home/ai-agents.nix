@@ -93,10 +93,6 @@ in
     enableMcpIntegration = true;
 
     settings = {
-      env = {
-        ANTHROPIC_DEFAULT_HAIKU_MODEL = "claude-sonnet-4-6[1m]";
-        ANTHROPIC_DEFAULT_SONNET_MODEL = "claude-sonnet-4-6[1m]";
-      };
 
       permissions.defaultMode = "auto";
 
